@@ -2,7 +2,7 @@ require 'rails_helper'
 require 'support/redis'
 
 describe TestWrangler::Experiment do
-  describe '#new(name, variants=[])' do
+  describe '::new(name, variants=[])' do
     context 'with only a name' do
       it 'instantiates an experiment whose only variant has the same name as the experiment' do
         experiment = TestWrangler::Experiment.new('my_great_experiment')
@@ -57,7 +57,7 @@ describe TestWrangler::Experiment do
           end
           context 'when the sum of the weights is greater than or equal to one' do
             it "assigns the smallest specified weight to all unspecified variants, then normalizes weights to fractions of one" do
-              experiment = TestWrangler::Experiment.new('my_great_experiment', [{alternative_1: 0.5},{alternative_2: 0.5}, :alternative_3, {alternative_4: 0.25}])
+              experiment = TestWrangler::Experiment.new('my_great_experiment', [{alternative_1: 0.5}, {alternative_2: 0.5}, :alternative_3, {alternative_4: 0.25}])
               expect(experiment.variants[:alternative_1]).to eq(1.0/3.0)
               expect(experiment.variants[:alternative_2]).to eq(1.0/3.0)
               expect(experiment.variants[:alternative_3]).to eq(0.25/1.5)
@@ -66,6 +66,22 @@ describe TestWrangler::Experiment do
           end
         end
       end
+    end
+  end
+
+  describe "#serialize" do
+    it "outputs a datastructure that can be used for persistence" do
+      experiment = TestWrangler::Experiment.new('my_great_experiment', [{alternative_1: 0.5}, {alternative_2: 0.5}, :alternative_3, {alternative_4: 0.25}])
+      expected = ['my_great_experiment', {'alternative_1' => 1.0/3.0, 'alternative_2' => 1.0/3.0, 'alternative_3' => 0.25/1.5, 'alternative_4' => 0.25/1.5}]
+      expect(experiment.serialize).to eq(expected)
+    end
+  end
+
+  describe "::deserialize(data)" do
+    it "accepts serialized experiment data and returns an experiment" do
+      experiment = TestWrangler::Experiment.new('my_great_experiment', [{alternative_1: 0.5}, {alternative_2: 0.5}, :alternative_3, {alternative_4: 0.25}])
+      experiment2 = TestWrangler::Experiment.deserialize(experiment.serialize)
+      expect(experiment).to eq(experiment2)
     end
   end
 end

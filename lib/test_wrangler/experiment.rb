@@ -2,12 +2,37 @@ module TestWrangler
   class Experiment
     attr_reader :name, :variants
 
-    def initialize(name, variants=[])
+    def initialize(name, variants=[], skip_normalization=false)
       @name = name
-      @variants = Experiment.normalize_variants(name, variants)
+      unless skip_normalization
+        @variants = Experiment.normalize_variants(name, variants)
+      else
+        @variants = HashWithIndifferentAccess.new(variants)
+      end
+    end
+
+    def serialize
+      [self.name.to_s, self.variants.stringify_keys]
+    end
+
+    def ==(other)
+      other.is_a?(TestWrangler::Experiment) && self.name == other.name && self.variants == other.variants
+    end
+    alias_method :eql?, :==
+
+    def hash
+      self.name.hash ^ self.variants.hash
     end
 
     class << self
+
+      def deserialize(data)
+        name, variants = data
+        variants.each do |k, v|
+          variants[k] = v.to_f
+        end
+        self.new(name, variants, true)
+      end
 
       def normalize_variants(name, variants)
         if variants.empty?
