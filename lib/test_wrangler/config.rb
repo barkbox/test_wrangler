@@ -10,19 +10,15 @@ module TestWrangler
     end
 
     def experiments_directory(dirname=nil)
-      @experiments_directory ||= dirname ? dirname :  rails ? rails.root.join('config', 'test_wrangler', 'experiments') : nil
+      @experiments_directory ||= dirname ? dirname : ::Rails.root.join('config', 'test_wrangler', 'experiments')
     end
 
     def cohorts_directory(dirname=nil)
-      @cohorts_directory ||= dirname ? dirname : rails ? rails.root.join('config', 'test_wrangler', 'cohorts') : nil
+      @cohorts_directory ||= dirname ? dirname : ::Rails.root.join('config', 'test_wrangler', 'cohorts')
     end
 
     def app_root(dir)
       @app_root = dir
-    end
-
-    def rails
-      @rails = defined?(Rails) ? Rails : nil
     end
 
   end
