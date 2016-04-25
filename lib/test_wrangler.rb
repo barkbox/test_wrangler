@@ -1,6 +1,7 @@
-require "test_wrangler/engine"
+require 'test_wrangler/engine'
 require 'test_wrangler/errors/errors'
 require 'test_wrangler/config'
+require 'test_wrangler/experiment'
 
 module TestWrangler
     
