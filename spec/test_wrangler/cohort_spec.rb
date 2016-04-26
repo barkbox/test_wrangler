@@ -22,14 +22,14 @@ describe TestWrangler::Cohort do
     end 
 
     describe 'match?(env)' do
-      context 'when all matchers return true for the given request' do
+      context 'when any matchers return true for the given request' do
         it 'returns true' do
           cohort = TestWrangler::Cohort.new('mobile', [{type: :user_agent, user_agent: [/Mobi/, /brows/]}])
           expect(cohort).to be_match({'HTTP_USER_AGENT' => 'Mobile browser'})
         end
       end
 
-      context 'when any matcher returns false for the given request' do
+      context 'when all matchers return false for the given request' do
         it 'returns false' do
           cohort = TestWrangler::Cohort.new('mobile', [{type: :user_agent, user_agent: [/Mobi/, /snuffle/]}])
           expect(cohort).to_not be_match({'HTTP_USER_AGENT' => 'Mobile browser'})

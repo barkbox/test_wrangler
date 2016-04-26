@@ -17,7 +17,7 @@ module TestWrangler
     end
 
     def match?(env)
-      criteria.all? do |criterion|
+      criteria.any? do |criterion|
         criterion.match?(env)
       end
     end
