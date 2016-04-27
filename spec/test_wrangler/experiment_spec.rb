@@ -84,4 +84,20 @@ describe TestWrangler::Experiment do
       expect(experiment).to eq(experiment2)
     end
   end
+
+  describe '#==' do
+    it "checks if the name and variants of two experiment objects are equivalent" do
+      experiment1 = TestWrangler::Experiment.new('my_great_experiment', [{alternative_1: 0.5}, {alternative_2: 0.5}, :alternative_3, {alternative_4: 0.25}])
+      experiment2 = TestWrangler::Experiment.new('my_great_experiment', [{alternative_1: 0.5}, {alternative_2: 0.5}, :alternative_3, {alternative_4: 0.25}])
+      expect(experiment1 == experiment2).to eq(true)
+    end
+  end
+
+  describe '#hash' do
+    it "uses the hash of the experiment's name and the hash of the experiment's variants to determine equivalence" do
+      experiment1 = TestWrangler::Experiment.new('my_great_experiment', [{alternative_1: 0.5}, {alternative_2: 0.5}, :alternative_3, {alternative_4: 0.25}])
+      experiment2 = TestWrangler::Experiment.new('my_great_experiment', [{alternative_1: 0.5}, {alternative_2: 0.5}, :alternative_3, {alternative_4: 0.25}])
+      expect(experiment1.hash).to eq(experiment2.hash)
+    end
+  end
 end

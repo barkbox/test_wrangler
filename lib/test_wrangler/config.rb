@@ -17,9 +17,5 @@ module TestWrangler
       @cohorts_directory ||= dirname ? dirname : ::Rails.root.join('config', 'test_wrangler', 'cohorts')
     end
 
-    def app_root(dir)
-      @app_root = dir
-    end
-
   end
 end
