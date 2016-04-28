@@ -1,4 +1,5 @@
 require 'rails_helper'
+require 'support/redis'
 
 describe TestWrangler do
   describe '::active?' do
@@ -26,11 +27,38 @@ describe TestWrangler do
       it 'returns true' do
         expect(TestWrangler.save_experiment(experiment)).to eq(true)
       end
+      it 'persists the experiment configuration to redis' do
+        TestWrangler.save_experiment(experiment)
+        expect(TestWrangler.experiment_exists?(experiment)).to eq(true)
+      end
     end
     context 'when the experiment does not have a unique name' do
       it 'returns false' do
         TestWrangler.save_experiment(experiment)
         expect(TestWrangler.save_experiment(experiment)).to eq(false)
+      end
+    end
+  end
+
+  describe '::remove_experiment(experiment)' do
+    let(:experiment) do
+      experiment = TestWrangler::Experiment.new('facebook_signup', [:signup_on_cya])
+      TestWrangler.save_experiment(experiment)
+      experiment
+    end
+
+    context 'when the experiment exists' do
+      it 'returns true' do
+        expect(TestWrangler.remove_experiment(experiment)).to eq(true)
+      end
+      it 'removes the experiment from redis' do
+        expect{TestWrangler.remove_experiment(experiment)}.to change{TestWrangler.experiment_exists?(experiment)}.from(true).to(false)
+      end
+    end
+
+    context 'when the experiment does not exist' do
+      it 'returns false' do
+        expect(TestWrangler.remove_experiment('random')).to eq(false)
       end
     end
   end
