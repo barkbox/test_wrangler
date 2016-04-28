@@ -1,12 +1,7 @@
 module TestWrangler
   class Cohort
     module Matchers
-      class QueryParametersMatcher
-        attr_reader :rules
-        
-        def initialize(*rules)
-          @rules = rules.flatten
-        end
+      class QueryParametersMatcher < BaseMatcher
 
         def match?(env)
           query_parameters = Rack::Utils.parse_nested_query(env['QUERY_STRING'])

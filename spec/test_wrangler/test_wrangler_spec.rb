@@ -21,6 +21,47 @@ describe TestWrangler do
     end
   end
 
+  describe '::save_cohort(cohort)' do
+    let(:cohort){TestWrangler::Cohort.new('facebook', [{type: :query_parameters, query_parameters: {'UTM_SOURCE'=>'facebook'}}])}
+    context 'when the cohort has a unique name' do
+      it 'returns true' do
+        expect(TestWrangler.save_cohort(cohort)).to eq(true)
+      end
+      it 'persists the cohort configuration to redis' do
+        expect{TestWrangler.save_cohort(cohort)}.to change{TestWrangler.cohort_exists?(cohort)}.from(false).to(true)
+      end
+    end
+    context 'when the cohort does not have a unique name' do
+      it 'returns false' do
+        expect(TestWrangler.save_cohort(cohort)).to eq(true)
+        expect(TestWrangler.save_cohort(cohort)).to eq(false)
+      end
+    end
+  end
+
+  describe '::remove_cohort(cohort_name)' do
+    let(:cohort) do
+      cohort = TestWrangler::Cohort.new('facebook', [{type: :query_parameters, query_parameters: {'UTM_SOURCE'=>'facebook'}}])
+      TestWrangler.save_cohort(cohort)
+      cohort
+    end
+
+    context 'when the cohort exists' do
+      it 'returns true' do
+        expect(TestWrangler.remove_cohort(cohort)).to eq(true)
+      end
+      it 'removes the cohort from redis' do
+        expect{TestWrangler.remove_cohort(cohort)}.to change{TestWrangler.cohort_exists?(cohort)}.from(true).to(false)
+      end
+    end
+
+    context 'when the cohort does not exist' do
+      it 'returns false' do
+        expect(TestWrangler.remove_cohort('random')).to eq(false)
+      end
+    end
+  end
+
   describe '::save_experiment(experiment)' do
     let(:experiment){TestWrangler::Experiment.new('facebook_signup', [:signup_on_cya])}
     context 'when the experiment has a unique name' do

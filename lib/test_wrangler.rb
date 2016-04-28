@@ -25,6 +25,36 @@ module TestWrangler
     ENV["TEST_WRANGLER"] == 'on'
   end
 
+  def assignment_for(env)
+  end
+
+  def cohort_exists?(cohort_name)
+    cohort_name = cohort_name.name if cohort_name.is_a? TestWrangler::Cohort
+    redis.sismember('cohorts', cohort_name) rescue false
+  end
+
+  def save_cohort(cohort)
+    return false if cohort_exists?(cohort.name)
+    serialized = cohort.serialize
+    key = "cohorts:#{serialized[0]}"
+    redis.multi do
+      redis.sadd('cohorts', serialized[0])
+      redis.rpush("cohorts:#{serialized[0]}:criteria", *serialized[1])
+    end
+    true
+  end
+
+  def remove_cohort(cohort_name)
+    cohort_name = cohort_name.name if cohort_name.is_a? TestWrangler::Cohort
+    return false unless cohort_exists?(cohort_name)
+    rules_key = "cohorts:#{cohort_name}"
+    redis.multi do
+      redis.srem('cohorts', cohort_name)
+      redis.del(rules_key)
+    end
+    true
+  end
+  
   def experiment_exists?(experiment_name)
     experiment_name = experiment_name.name if experiment_name.is_a? TestWrangler::Experiment
     redis.sismember('experiments', experiment_name) rescue false
@@ -37,9 +67,6 @@ module TestWrangler
     state == 'active'
   end
 
-  def assignment_for(env)
-  end
-  
   def save_experiment(experiment)
     return false if experiment_exists?(experiment.name)
     serialized = experiment.serialize

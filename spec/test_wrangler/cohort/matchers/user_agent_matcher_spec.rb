@@ -9,6 +9,17 @@ describe TestWrangler::Cohort::Matchers::UserAgentMatcher do
     end
   end
 
+  describe '::deserialize(rules)' do
+    it "correctly deserializes regex rules" do
+      config = {type: :user_agent, user_agent: ['Mobile user agent', /Mobile/, /this is just a\w test/imx]}
+      serialized = JSON.parse(config.to_json)
+      deserialized = {type: :user_agent, user_agent: TestWrangler::Cohort::Matchers::UserAgentMatcher.deserialize(serialized['user_agent'])}
+      expect(deserialized[:user_agent].first).to be_a(String)
+      expect(deserialized[:user_agent][1]).to be_a(Regexp)
+      expect(deserialized[:user_agent][2]).to be_a(Regexp)
+    end
+  end
+
   describe '#match?(env)' do
     context 'with string rules' do
       it 'will match if the user agent is exactly equal to the string' do
@@ -33,4 +44,5 @@ describe TestWrangler::Cohort::Matchers::UserAgentMatcher do
       end
     end
   end
+
 end
