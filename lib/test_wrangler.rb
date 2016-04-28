@@ -27,12 +27,12 @@ module TestWrangler
 
   def experiment_exists?(experiment_name)
     experiment_name = experiment_name.name if experiment_name.is_a? TestWrangler::Experiment
-    redis.exists("#{config.root_key}:experiments:#{experiment_name}")
+    redis.sismember('experiments', experiment_name) rescue false
   end
 
   def experiment_active?(experiment_name)
     experiment_name = experiment_name.name if experiment_name.is_a? TestWrangler::Experiment
-    key = "#{config.root_key}:experiments:#{experiment_name}"
+    key = "experiments:#{experiment_name}"
     state = redis.hget(key, 'state') rescue nil
     state == 'active'
   end
@@ -43,15 +43,18 @@ module TestWrangler
   def save_experiment(experiment)
     return false if experiment_exists?(experiment.name)
     serialized = experiment.serialize
-    key = "#{config.root_key}:experiments:#{serialized[0]}"
-    redis.hmset(key, *serialized[1].to_a)
+    key = "experiments:#{serialized[0]}"
+    redis.multi do
+      redis.sadd('experiments', serialized[0])
+      redis.hmset(key, *serialized[1].to_a)
+    end
     true
   end
 
   def activate_experiment(experiment_name)
     experiment_name = experiment_name.name if experiment_name.is_a? TestWrangler::Experiment
     return false unless experiment_exists?(experiment_name)
-    key = "#{config.root_key}:experiments:#{experiment_name}"
+    key = "experiments:#{experiment_name}"
     redis.hset(key, 'state', 'active')
     true
   end
@@ -59,8 +62,19 @@ module TestWrangler
   def deactivate_experiment(experiment_name)
     experiment_name = experiment_name.name if experiment_name.is_a? TestWrangler::Experiment
     return false unless experiment_exists?(experiment_name)
-    key = "#{config.root_key}:experiments:#{experiment_name}"
+    key = "experiments:#{experiment_name}"
     redis.hset(key, 'state', nil)
+    true
+  end
+
+  def remove_experiment(experiment_name)
+    experiment_name = experiment_name.name if experiment_name.is_a? TestWrangler::Experiment
+    return false unless experiment_exists?(experiment_name)
+    key = "experiments:#{experiment_name}"
+    redis.multi do
+      redis.srem('experiments', experiment_name)
+      redis.del(key)
+    end
     true
   end
 
