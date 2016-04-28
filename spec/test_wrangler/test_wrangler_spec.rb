@@ -131,6 +131,31 @@ describe TestWrangler do
     end
   end
 
+  describe 'active_cohorts' do
+    let(:cohort1){TestWrangler::Cohort.new('facebook', [{type: :query_parameters, query_parameters: {'UTM_SOURCE'=>'facebook'}}])}
+    let(:cohort2){TestWrangler::Cohort.new('mobile', [{type: :user_agent, user_agent: [/Mobi/]}])}
+
+    context 'when there are active cohorts' do
+      before do
+        TestWrangler.save_cohort(cohort1)
+        TestWrangler.activate_cohort(cohort1)
+        TestWrangler.save_cohort(cohort2)
+        TestWrangler.activate_cohort(cohort2)
+      end
+
+      it 'returns an array of active cohort instances' do
+        expect(TestWrangler.active_cohorts).to include(cohort1)
+        expect(TestWrangler.active_cohorts).to include(cohort2)
+      end
+    end
+
+    context 'when there are no active cohorts' do
+      it 'returns an empty array' do
+        expect(TestWrangler.active_cohorts).to eq([])
+      end
+    end
+  end
+
   describe '::remove_experiment(experiment)' do
     let(:experiment) do
       experiment = TestWrangler::Experiment.new('facebook_signup', [:signup_on_cya])

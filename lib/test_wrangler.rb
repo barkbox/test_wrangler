@@ -28,6 +28,17 @@ module TestWrangler
   def assignment_for(env)
   end
 
+  def active_cohorts
+    cohort_names = redis.smembers('cohorts') rescue []
+    cohort_names.reduce([]) do |arr, cn|
+      if cohort_active?(cn)
+        criteria = redis.lrange("cohorts:#{cn}:criteria", 0, -1) rescue nil
+        arr << TestWrangler::Cohort.deserialize([cn, criteria]) if criteria
+      end
+      arr
+    end
+  end
+
   def cohort_exists?(cohort_name)
     cohort_name = cohort_name.name if cohort_name.is_a? TestWrangler::Cohort
     redis.sismember('cohorts', cohort_name) rescue false
