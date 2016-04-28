@@ -70,7 +70,7 @@ describe TestWrangler::Experiment do
   end
 
   describe "#serialize" do
-    it "outputs a datastructure that can be used for persistence" do
+    it "outputs a data structure that can be used for persistence" do
       experiment = TestWrangler::Experiment.new('my_great_experiment', [{alternative_1: 0.5}, {alternative_2: 0.5}, :alternative_3, {alternative_4: 0.25}])
       expected = ['my_great_experiment', {'alternative_1' => 1.0/3.0, 'alternative_2' => 1.0/3.0, 'alternative_3' => 0.25/1.5, 'alternative_4' => 0.25/1.5}]
       expect(experiment.serialize).to eq(expected)
