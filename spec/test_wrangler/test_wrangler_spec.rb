@@ -62,6 +62,56 @@ describe TestWrangler do
     end
   end
 
+  describe '::activate_cohort(cohort)' do
+    let(:cohort){TestWrangler::Cohort.new('facebook', [{type: :query_parameters, query_parameters: {'UTM_SOURCE'=>'facebook'}}])}
+    it "if the cohort has not been saved it returns false" do
+      expect(TestWrangler.activate_cohort(cohort)).to eq(false)
+      expect(TestWrangler.cohort_active?(cohort)).to eq(false)
+    end
+    it "if the cohort exists in redis it returns true" do
+      TestWrangler.save_cohort(cohort)
+      expect(TestWrangler.activate_cohort(cohort)).to eq(true)
+      expect(TestWrangler.cohort_active?(cohort)).to eq(true)
+    end
+  end
+
+  describe '::deactivate_cohort(cohort)' do
+    let(:cohort){TestWrangler::Cohort.new('facebook', [{type: :query_parameters, query_parameters: {'UTM_SOURCE'=>'facebook'}}])}
+    it "returns false if the cohort does not exist" do
+      expect(TestWrangler.deactivate_cohort(cohort)).to eq(false)
+    end
+    it "returns true if the cohort name exists in redis" do
+      TestWrangler.save_cohort(cohort)
+      TestWrangler.activate_cohort(cohort)
+      expect(TestWrangler.deactivate_cohort(cohort)).to eq(true)
+      expect(TestWrangler.cohort_active?(cohort)).to eq(false)
+    end
+  end
+
+  describe '::cohort_active?(cohort_name)' do
+    before do
+      cohort = TestWrangler::Cohort.new('facebook', [{type: :query_parameters, query_parameters: {'UTM_SOURCE'=>'facebook'}}])
+      TestWrangler.save_cohort(cohort)
+      TestWrangler.activate_cohort(cohort)
+    end
+
+    context 'when the cohort exists and its state key is set to "active"' do
+      it "returns true" do
+        expect(TestWrangler.cohort_active?('facebook')).to eq(true)
+      end
+    end
+    context 'when the cohort does not exist, or its state key is not set to "active"' do
+      before do
+        TestWrangler.deactivate_cohort('facebook')
+      end
+
+      it "returns false" do
+        expect(TestWrangler.cohort_active?('facebook')).to eq(false)
+        expect(TestWrangler.cohort_active?('random')).to eq(false)
+      end
+    end
+  end
+
   describe '::save_experiment(experiment)' do
     let(:experiment){TestWrangler::Experiment.new('facebook_signup', [:signup_on_cya])}
     context 'when the experiment has a unique name' do

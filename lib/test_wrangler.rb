@@ -54,6 +54,29 @@ module TestWrangler
     end
     true
   end
+
+  def activate_cohort(cohort_name)
+    cohort_name = cohort_name.name if cohort_name.is_a? TestWrangler::Cohort
+    return false unless cohort_exists?(cohort_name)
+    key = "cohorts:#{cohort_name}:state"
+    redis.set(key, 'active')
+    true
+  end
+
+  def deactivate_cohort(cohort_name)
+    cohort_name = cohort_name.name if cohort_name.is_a? TestWrangler::Cohort
+    return false unless cohort_exists?(cohort_name)
+    key = "cohorts:#{cohort_name}:state"
+    redis.set(key, nil)
+    true
+  end
+
+  def cohort_active?(cohort_name)
+    cohort_name = cohort_name.name if cohort_name.is_a? TestWrangler::Cohort
+    key = "cohorts:#{cohort_name}:state"
+    state = redis.get(key) rescue nil
+    state == 'active'
+  end
   
   def experiment_exists?(experiment_name)
     experiment_name = experiment_name.name if experiment_name.is_a? TestWrangler::Experiment
