@@ -155,9 +155,9 @@ describe TestWrangler do
         TestWrangler.activate_cohort(cohort2)
       end
 
-      it 'returns an array of active cohort instances' do
-        expect(TestWrangler.active_cohorts).to include(cohort1)
-        expect(TestWrangler.active_cohorts).to include(cohort2)
+      it 'returns a sorted array of active cohort data' do
+        expect(TestWrangler.active_cohorts).to include(cohort1.serialize)
+        expect(TestWrangler.active_cohorts).to include(cohort2.serialize)
       end
     end
 

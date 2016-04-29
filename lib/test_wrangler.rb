@@ -32,13 +32,13 @@ module TestWrangler
     cohort_names = redis.smembers('cohorts') rescue []
     cohorts = cohort_names.reduce([]) do |arr, cn|
       if cohort_active?(cn)
-        priority = redis.get("cohorts:#{cn}:priority")
+        priority = redis.get("cohorts:#{cn}:priority").to_i
         criteria = redis.lrange("cohorts:#{cn}:criteria", 0, -1) rescue nil
-        arr << TestWrangler::Cohort.deserialize([cn, priority, criteria]) if criteria
+        arr << [cn, priority, criteria]
       end
       arr
     end
-    cohorts.sort
+    cohorts.sort{|a, b| a[1] <=> b[1]}
   end
 
   def cohort_exists?(cohort_name)
