@@ -22,7 +22,7 @@ describe TestWrangler do
   end
 
   describe '::save_cohort(cohort)' do
-    let(:cohort){TestWrangler::Cohort.new('facebook', [{type: :query_parameters, query_parameters: {'UTM_SOURCE'=>'facebook'}}])}
+    let(:cohort){TestWrangler::Cohort.new('facebook', 0, [{type: :query_parameters, query_parameters: {'UTM_SOURCE'=>'facebook'}}])}
     context 'when the cohort has a unique name' do
       it 'returns true' do
         expect(TestWrangler.save_cohort(cohort)).to eq(true)
@@ -41,7 +41,7 @@ describe TestWrangler do
 
   describe '::remove_cohort(cohort_name)' do
     let(:cohort) do
-      cohort = TestWrangler::Cohort.new('facebook', [{type: :query_parameters, query_parameters: {'UTM_SOURCE'=>'facebook'}}])
+      cohort = TestWrangler::Cohort.new('facebook', 0, [{type: :query_parameters, query_parameters: {'UTM_SOURCE'=>'facebook'}}])
       TestWrangler.save_cohort(cohort)
       cohort
     end
@@ -75,7 +75,7 @@ describe TestWrangler do
   end
 
   describe '::activate_cohort(cohort)' do
-    let(:cohort){TestWrangler::Cohort.new('facebook', [{type: :query_parameters, query_parameters: {'UTM_SOURCE'=>'facebook'}}])}
+    let(:cohort){TestWrangler::Cohort.new('facebook', 0, [{type: :query_parameters, query_parameters: {'UTM_SOURCE'=>'facebook'}}])}
     it "if the cohort has not been saved it returns false" do
       expect(TestWrangler.activate_cohort(cohort)).to eq(false)
       expect(TestWrangler.cohort_active?(cohort)).to eq(false)
@@ -88,7 +88,7 @@ describe TestWrangler do
   end
 
   describe '::deactivate_cohort(cohort)' do
-    let(:cohort){TestWrangler::Cohort.new('facebook', [{type: :query_parameters, query_parameters: {'UTM_SOURCE'=>'facebook'}}])}
+    let(:cohort){TestWrangler::Cohort.new('facebook', 0, [{type: :query_parameters, query_parameters: {'UTM_SOURCE'=>'facebook'}}])}
     it "returns false if the cohort does not exist" do
       expect(TestWrangler.deactivate_cohort(cohort)).to eq(false)
     end
@@ -102,7 +102,7 @@ describe TestWrangler do
 
   describe '::cohort_active?(cohort_name)' do
     before do
-      cohort = TestWrangler::Cohort.new('facebook', [{type: :query_parameters, query_parameters: {'UTM_SOURCE'=>'facebook'}}])
+      cohort = TestWrangler::Cohort.new('facebook', 0, [{type: :query_parameters, query_parameters: {'UTM_SOURCE'=>'facebook'}}])
       TestWrangler.save_cohort(cohort)
       TestWrangler.activate_cohort(cohort)
     end
@@ -144,8 +144,8 @@ describe TestWrangler do
   end
 
   describe '::active_cohorts' do
-    let(:cohort1){TestWrangler::Cohort.new('facebook', [{type: :query_parameters, query_parameters: {'UTM_SOURCE'=>'facebook'}}])}
-    let(:cohort2){TestWrangler::Cohort.new('mobile', [{type: :user_agent, user_agent: [/Mobi/]}])}
+    let(:cohort1){TestWrangler::Cohort.new('facebook', 0, [{type: :query_parameters, query_parameters: {'UTM_SOURCE'=>'facebook'}}])}
+    let(:cohort2){TestWrangler::Cohort.new('mobile', 0, [{type: :user_agent, user_agent: [/Mobi/]}])}
 
     context 'when there are active cohorts' do
       before do
@@ -176,7 +176,7 @@ describe TestWrangler do
     end
     
     let(:cohort) do
-      cohort = TestWrangler::Cohort.new('facebook', [{type: :query_parameters, query_parameters: {'UTM_SOURCE'=>'facebook'}}])
+      cohort = TestWrangler::Cohort.new('facebook', 0, [{type: :query_parameters, query_parameters: {'UTM_SOURCE'=>'facebook'}}])
       TestWrangler.save_cohort(cohort)
       cohort
     end
@@ -219,7 +219,7 @@ describe TestWrangler do
     end
     
     let(:cohort) do
-      cohort = TestWrangler::Cohort.new('facebook', [{type: :query_parameters, query_parameters: {'UTM_SOURCE'=>'facebook'}}])
+      cohort = TestWrangler::Cohort.new('facebook', 0, [{type: :query_parameters, query_parameters: {'UTM_SOURCE'=>'facebook'}}])
       TestWrangler.save_cohort(cohort)
       cohort
     end
@@ -260,7 +260,7 @@ describe TestWrangler do
     end
     
     let(:cohort) do
-      cohort = TestWrangler::Cohort.new('facebook', [{type: :query_parameters, query_parameters: {'UTM_SOURCE'=>'facebook'}}])
+      cohort = TestWrangler::Cohort.new('facebook', 0, [{type: :query_parameters, query_parameters: {'UTM_SOURCE'=>'facebook'}}])
       TestWrangler.save_cohort(cohort)
       cohort
     end
@@ -296,7 +296,7 @@ describe TestWrangler do
     end
     
     let(:cohort) do
-      cohort = TestWrangler::Cohort.new('facebook', [{type: :query_parameters, query_parameters: {'UTM_SOURCE'=>'facebook'}}])
+      cohort = TestWrangler::Cohort.new('facebook', 0, [{type: :query_parameters, query_parameters: {'UTM_SOURCE'=>'facebook'}}])
       TestWrangler.save_cohort(cohort)
       cohort
     end
@@ -331,7 +331,7 @@ describe TestWrangler do
     end
     
     let(:cohort) do
-      cohort = TestWrangler::Cohort.new('facebook', [{type: :query_parameters, query_parameters: {'UTM_SOURCE'=>'facebook'}}])
+      cohort = TestWrangler::Cohort.new('facebook', 0, [{type: :query_parameters, query_parameters: {'UTM_SOURCE'=>'facebook'}}])
       TestWrangler.save_cohort(cohort)
       cohort
     end
@@ -375,7 +375,7 @@ describe TestWrangler do
 
       context 'when the experiment was attached to a cohort' do
         before do
-          cohort = TestWrangler::Cohort.new('facebook', [{type: :query_parameters, query_parameters: {'UTM_SOURCE'=>'facebook'}}])
+          cohort = TestWrangler::Cohort.new('facebook', 0, [{type: :query_parameters, query_parameters: {'UTM_SOURCE'=>'facebook'}}])
           TestWrangler.save_cohort(cohort)
           TestWrangler.add_experiment_to_cohort(experiment, cohort)
         end
@@ -413,7 +413,7 @@ describe TestWrangler do
 
     it "activates the experiment with any cohort it belongs to" do
       TestWrangler.save_experiment(experiment)
-      cohort = TestWrangler::Cohort.new('facebook', [{type: :query_parameters, query_parameters: {'UTM_SOURCE'=>'facebook'}}])
+      cohort = TestWrangler::Cohort.new('facebook', 0, [{type: :query_parameters, query_parameters: {'UTM_SOURCE'=>'facebook'}}])
       TestWrangler.save_cohort(cohort)
       TestWrangler.add_experiment_to_cohort(experiment, cohort)
       expect{TestWrangler.activate_experiment(experiment)}.to change{TestWrangler.active_cohort_experiments(cohort)}
@@ -433,7 +433,7 @@ describe TestWrangler do
     end
     it "deactivates the experiment with any cohort it belongs to" do
       TestWrangler.save_experiment(experiment)
-      cohort = TestWrangler::Cohort.new('facebook', [{type: :query_parameters, query_parameters: {'UTM_SOURCE'=>'facebook'}}])
+      cohort = TestWrangler::Cohort.new('facebook', 0, [{type: :query_parameters, query_parameters: {'UTM_SOURCE'=>'facebook'}}])
       TestWrangler.save_cohort(cohort)
       TestWrangler.add_experiment_to_cohort(experiment, cohort)
       TestWrangler.activate_experiment(experiment)

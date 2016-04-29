@@ -30,13 +30,15 @@ module TestWrangler
 
   def active_cohorts
     cohort_names = redis.smembers('cohorts') rescue []
-    cohort_names.reduce([]) do |arr, cn|
+    cohorts = cohort_names.reduce([]) do |arr, cn|
       if cohort_active?(cn)
+        priority = redis.get("cohorts:#{cn}:priority")
         criteria = redis.lrange("cohorts:#{cn}:criteria", 0, -1) rescue nil
-        arr << TestWrangler::Cohort.deserialize([cn, criteria]) if criteria
+        arr << TestWrangler::Cohort.deserialize([cn, priority, criteria]) if criteria
       end
       arr
     end
+    cohorts.sort
   end
 
   def cohort_exists?(cohort_name)
@@ -50,7 +52,8 @@ module TestWrangler
     key = "cohorts:#{serialized[0]}"
     redis.multi do
       redis.sadd('cohorts', serialized[0])
-      redis.rpush("cohorts:#{serialized[0]}:criteria", *serialized[1])
+      redis.set("#{key}:priority", serialized[1])
+      redis.rpush("#{key}:criteria", *serialized[2])
     end
     true
   end
@@ -58,16 +61,18 @@ module TestWrangler
   def remove_cohort(cohort_name)
     cohort_name = cohort_name.name if cohort_name.is_a? TestWrangler::Cohort
     return false unless cohort_exists?(cohort_name)
-    rules_key = "cohorts:#{cohort_name}:criteria"
-    experiments_key = "cohorts:#{cohort_name}:experiments"
-    active_experiments_key = "cohorts:#{cohort_name}:active_experiments"
+    key = "cohorts:#{cohort_name}"
+    criteria_key = "#{key}:criteria"
+    priority_key = "#{key}:priority"
+    experiments_key = "#{key}:experiments"
+    active_experiments_key = "#{key}:active_experiments"
     experiments = redis.smembers(experiments_key)
     redis.multi do
       redis.srem('cohorts', cohort_name)
       experiments.each do |experiment|
         redis.srem("experiments:#{experiment}:cohorts", cohort_name)
       end
-      redis.del(rules_key, experiments_key, active_experiments_key)
+      redis.del(criteria_key, experiments_key, active_experiments_key, priority_key)
     end
     true
   end
@@ -222,6 +227,4 @@ module TestWrangler
 
     true
   end
-
 end
-

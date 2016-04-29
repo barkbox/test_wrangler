@@ -4,11 +4,12 @@ require 'test_wrangler/cohort/matchers'
 
 module TestWrangler
   class Cohort
-    attr_reader :name
-    attr_reader :criteria
+    include Comparable
+    attr_reader :name, :criteria, :priority
 
-    def initialize(name, criteria)
+    def initialize(name, priority, criteria)
       @name = name
+      @priority = priority
       @original_criteria = criteria
     end
 
@@ -30,24 +31,29 @@ module TestWrangler
     end
     alias_method :eql?, :==
 
+
+    def <=>(other)
+      self.priority <=> other.priority
+    end
+
     def hash
       self.serialize.hash
     end
 
     def serialize
       serialized_criteria = @original_criteria.map(&:to_json)
-      [name, serialized_criteria]
+      [name, priority, serialized_criteria]
     end
 
     def self.deserialize(data)
-      criteria = data[1].map do |criterion|
+      criteria = data[2].map do |criterion|
         criterion = JSON.parse(criterion)
         type = criterion['type']
         criterion_class = type_to_criterion_class(type)
         criterion[type] = criterion_class.deserialize(criterion[type])
         criterion
       end
-      self.new(data[0], criteria)
+      self.new(data[0], data[1].to_i, criteria)
     end
 
     def self.type_to_criterion_class(type)
