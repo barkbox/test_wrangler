@@ -156,6 +156,115 @@ describe TestWrangler do
     end
   end
 
+  describe '::add_experiment_to_cohort(experiment_name, cohort_name)' do
+    let(:experiment) do
+      experiment = TestWrangler::Experiment.new('facebook_signup', [:signup_on_cya])
+      TestWrangler.save_experiment(experiment)
+      experiment
+    end
+    
+    let(:cohort) do
+      cohort = TestWrangler::Cohort.new('facebook', [{type: :query_parameters, query_parameters: {'UTM_SOURCE'=>'facebook'}}])
+      TestWrangler.save_cohort(cohort)
+      cohort
+    end
+
+    context 'when both the experiment and the cohort exist in redis' do
+      it 'returns true' do
+        expect(TestWrangler.add_experiment_to_cohort(experiment, cohort)).to eq(true)
+      end
+      it 'attaches the experiment to the cohort' do
+        expect{TestWrangler.add_experiment_to_cohort(experiment, cohort)}.to change{TestWrangler.cohort_experiments(cohort)}
+      end
+    end
+
+    context 'when either the experiment or the cohort do not exist in redis' do
+      it 'returns false' do
+        expect(TestWrangler.add_experiment_to_cohort('some_random_experiment', cohort)).to eq(false)
+        expect(TestWrangler.add_experiment_to_cohort(experiment, 'some_random_cohort')).to eq(false)
+      end
+      it 'does not change redis data' do
+        expect{TestWrangler.add_experiment_to_cohort('some_random_experiment', cohort)}.to_not change{TestWrangler.cohort_experiments(cohort)}
+      end
+    end
+  end
+
+  describe '::remove_experiment_from_cohort(experiment_name, cohort_name)' do
+    let(:experiment) do
+      experiment = TestWrangler::Experiment.new('facebook_signup', [:signup_on_cya])
+      TestWrangler.save_experiment(experiment)
+      experiment
+    end
+    
+    let(:cohort) do
+      cohort = TestWrangler::Cohort.new('facebook', [{type: :query_parameters, query_parameters: {'UTM_SOURCE'=>'facebook'}}])
+      TestWrangler.save_cohort(cohort)
+      cohort
+    end
+
+    context 'when the experiment is a member of the cohort' do
+      before do
+        TestWrangler.add_experiment_to_cohort(experiment, cohort)
+      end
+
+      it 'returns true' do
+        expect(TestWrangler.remove_experiment_from_cohort(experiment, cohort)).to eq(true)
+      end
+
+      it 'removes the experiment from the cohort' do
+        expect{TestWrangler.remove_experiment_from_cohort(experiment, cohort)}.to change{TestWrangler.cohort_experiments(cohort)}
+      end
+    end
+
+    context 'when the experiment is not a member of the cohort' do
+      it 'returns false' do
+        expect(TestWrangler.remove_experiment_from_cohort(experiment, cohort)).to eq(false)
+      end
+    end
+
+    context 'when the experiment or cohort do not exist' do
+      it 'returns false' do
+        expect(TestWrangler.remove_experiment_from_cohort('shoop', cohort)).to eq(false)
+        expect(TestWrangler.remove_experiment_from_cohort(experiment, 'shoop')).to eq(false)
+      end
+    end
+  end
+
+  describe '::cohort_experiments(cohort_name)' do
+    let(:experiment) do
+      experiment = TestWrangler::Experiment.new('facebook_signup', [:signup_on_cya])
+      TestWrangler.save_experiment(experiment)
+      experiment
+    end
+    
+    let(:cohort) do
+      cohort = TestWrangler::Cohort.new('facebook', [{type: :query_parameters, query_parameters: {'UTM_SOURCE'=>'facebook'}}])
+      TestWrangler.save_cohort(cohort)
+      cohort
+    end
+
+    context 'when experiments have been added to the cohort' do
+      before do
+        TestWrangler.add_experiment_to_cohort(experiment, cohort)
+      end
+      it 'returns a list of experiment names' do
+        expect(TestWrangler.cohort_experiments(cohort)).to eq(['facebook_signup'])
+      end
+    end
+
+    context 'when no experiments have been added to the cohort' do
+      it 'returns an empty list' do
+        expect(TestWrangler.cohort_experiments(cohort)).to be_empty
+      end
+    end
+
+    context 'when the cohort does not exist' do
+      it 'returns false' do
+        expect(TestWrangler.cohort_experiments('random')).to eq(false)
+      end
+    end
+  end
+
   describe '::remove_experiment(experiment)' do
     let(:experiment) do
       experiment = TestWrangler::Experiment.new('facebook_signup', [:signup_on_cya])

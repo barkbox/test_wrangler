@@ -58,10 +58,16 @@ module TestWrangler
   def remove_cohort(cohort_name)
     cohort_name = cohort_name.name if cohort_name.is_a? TestWrangler::Cohort
     return false unless cohort_exists?(cohort_name)
-    rules_key = "cohorts:#{cohort_name}"
+    rules_key = "cohorts:#{cohort_name}:criteria"
+    experiments_key = "cohorts:#{cohort_name}:experiments"
+    active_experiments_key = "cohorts:#{cohort_name}:active_experiments"
+    experiments = redis.smembers(experiments_key)
     redis.multi do
       redis.srem('cohorts', cohort_name)
-      redis.del(rules_key)
+      experiments.each do |experiment|
+        redis.srem("experiments:#{experiment}:cohorts", cohort_name)
+      end
+      redis.del(rules_key, experiments_key, active_experiments_key)
     end
     true
   end
@@ -87,6 +93,46 @@ module TestWrangler
     key = "cohorts:#{cohort_name}:state"
     state = redis.get(key) rescue nil
     state == 'active'
+  end
+
+  def add_experiment_to_cohort(experiment_name, cohort_name)
+    experiment_name = experiment_name.name if experiment_name.is_a? TestWrangler::Experiment
+    return false if !experiment_exists?(experiment_name)
+    cohort_name = cohort_name.name if cohort_name.is_a? TestWrangler::Cohort
+    return false if !cohort_exists?(cohort_name)
+    cohort_set_key = "cohorts:#{cohort_name}:experiments"
+    experiment_set_key = "experiments:#{experiment_name}:cohorts"
+    added = redis.sadd(cohort_set_key, experiment_name)
+    redis.sadd(experiment_set_key, cohort_name)
+
+    if added == 1 && experiment_active?(experiment_name)
+      list_key = "cohorts:#{cohort_name}:active_experiments"
+      redis.rpush(list_key, experiment_name)
+    end
+    true
+  end
+
+  def remove_experiment_from_cohort(experiment_name, cohort_name)
+    experiment_name = experiment_name.name if experiment_name.is_a? TestWrangler::Experiment
+    return false if !experiment_exists?(experiment_name)
+    cohort_name = cohort_name.name if cohort_name.is_a? TestWrangler::Cohort
+    return false if !cohort_exists?(cohort_name)
+    results = redis.multi do
+      redis.srem("cohorts:#{cohort_name}:experiments", experiment_name)
+      redis.srem("experiments:#{experiment_name}:cohorts", cohort_name)
+    end
+    if results[0] && results[1]
+      redis.lrem("cohorts:#{cohort_name}:active_experiments", 0, experiment_name) rescue nil
+      true
+    else
+      false
+    end
+  end
+
+  def cohort_experiments(cohort_name)
+    cohort_name = cohort_name.name if cohort_name.is_a? TestWrangler::Cohort
+    return false if !cohort_exists?(cohort_name)
+    redis.smembers("cohorts:#{cohort_name}:experiments") rescue []
   end
   
   def experiment_exists?(experiment_name)
@@ -116,7 +162,16 @@ module TestWrangler
     experiment_name = experiment_name.name if experiment_name.is_a? TestWrangler::Experiment
     return false unless experiment_exists?(experiment_name)
     key = "experiments:#{experiment_name}"
-    redis.hset(key, 'state', 'active')
+    cohorts_key = "#{key}:cohorts"
+    cohorts = redis.smembers(cohorts_key)
+
+    redis.multi do
+      redis.hset(key, 'state', 'active')
+      cohorts.each do |cohort|
+        redis.rpush("cohorts:#{cohort}:active_experiments", experiment_name)
+      end
+    end
+
     true
   end
 
@@ -124,18 +179,35 @@ module TestWrangler
     experiment_name = experiment_name.name if experiment_name.is_a? TestWrangler::Experiment
     return false unless experiment_exists?(experiment_name)
     key = "experiments:#{experiment_name}"
-    redis.hset(key, 'state', nil)
+    cohorts_key = "#{key}:cohorts"
+    cohorts = redis.smembers(cohorts_key)
+    
+    redis.multi do
+      redis.hset(key, 'state', nil)
+      cohorts.each do |cohort|
+        redis.lrem("cohorts:#{cohort}:active_experiments", 0, experiment_name)
+      end
+    end
+     
     true
   end
 
   def remove_experiment(experiment_name)
     experiment_name = experiment_name.name if experiment_name.is_a? TestWrangler::Experiment
     return false unless experiment_exists?(experiment_name)
-    key = "experiments:#{experiment_name}"
+    hash_key = "experiments:#{experiment_name}"
+    cohorts_key = "experiments:#{experiment_name}:cohorts"
+    cohorts = redis.smembers(cohorts_key)
+    
     redis.multi do
       redis.srem('experiments', experiment_name)
-      redis.del(key)
+      redis.del(hash_key, cohorts_key)
+      cohorts.each do |cohort|
+        redis.srem("cohorts:#{cohort}:experiments", experiment_name)
+        redis.lrem("cohorts:#{cohort}:active_experiments", 0, experiment_name)
+      end
     end
+
     true
   end
 
