@@ -105,7 +105,7 @@ module TestWrangler
     added = redis.sadd(cohort_set_key, experiment_name)
     redis.sadd(experiment_set_key, cohort_name)
 
-    if added == 1 && experiment_active?(experiment_name)
+    if added == true && experiment_active?(experiment_name)
       list_key = "cohorts:#{cohort_name}:active_experiments"
       redis.rpush(list_key, experiment_name)
     end
@@ -129,12 +129,24 @@ module TestWrangler
     end
   end
 
+  def active_cohort_experiments(cohort_name)
+    cohort_name = cohort_name.name if cohort_name.is_a? TestWrangler::Cohort
+    return false if !cohort_exists?(cohort_name)
+    redis.lrange("cohorts:#{cohort_name}:active_experiments", 0, -1) rescue []
+  end
+
   def cohort_experiments(cohort_name)
     cohort_name = cohort_name.name if cohort_name.is_a? TestWrangler::Cohort
     return false if !cohort_exists?(cohort_name)
     redis.smembers("cohorts:#{cohort_name}:experiments") rescue []
   end
-  
+
+  def experiment_cohorts(experiment_name)
+    experiment_name = experiment_name.name if experiment_name.is_a? TestWrangler::Experiment
+    return false if !experiment_exists?(experiment_name)
+    redis.smembers("experiments:#{experiment_name}:cohorts") rescue []
+  end
+
   def experiment_exists?(experiment_name)
     experiment_name = experiment_name.name if experiment_name.is_a? TestWrangler::Experiment
     redis.sismember('experiments', experiment_name) rescue false

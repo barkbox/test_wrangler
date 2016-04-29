@@ -53,6 +53,18 @@ describe TestWrangler do
       it 'removes the cohort from redis' do
         expect{TestWrangler.remove_cohort(cohort)}.to change{TestWrangler.cohort_exists?(cohort)}.from(true).to(false)
       end
+ 
+      context 'when the cohort has experiments' do
+        before do
+          experiment = TestWrangler::Experiment.new('facebook_signup', [:signup_on_cya])
+          TestWrangler.save_experiment(experiment)
+          TestWrangler.add_experiment_to_cohort(experiment, cohort)
+        end
+
+        it 'removes the association' do
+          expect{TestWrangler.remove_cohort(cohort)}.to change{TestWrangler.experiment_cohorts('facebook_signup')}
+        end
+      end
     end
 
     context 'when the cohort does not exist' do
@@ -131,7 +143,7 @@ describe TestWrangler do
     end
   end
 
-  describe 'active_cohorts' do
+  describe '::active_cohorts' do
     let(:cohort1){TestWrangler::Cohort.new('facebook', [{type: :query_parameters, query_parameters: {'UTM_SOURCE'=>'facebook'}}])}
     let(:cohort2){TestWrangler::Cohort.new('mobile', [{type: :user_agent, user_agent: [/Mobi/]}])}
 
@@ -175,6 +187,16 @@ describe TestWrangler do
       end
       it 'attaches the experiment to the cohort' do
         expect{TestWrangler.add_experiment_to_cohort(experiment, cohort)}.to change{TestWrangler.cohort_experiments(cohort)}
+      end
+
+      context 'when the experiment is active' do
+        before do
+          TestWrangler.activate_experiment(experiment)
+        end
+
+        it "adds the experiment to the cohort's active experiments" do
+          expect{TestWrangler.add_experiment_to_cohort(experiment, cohort)}.to change{TestWrangler.active_cohort_experiments(cohort)}
+        end
       end
     end
 
@@ -265,6 +287,77 @@ describe TestWrangler do
     end
   end
 
+  describe '::active_cohort_experiments(cohort_name)' do
+    let(:experiment) do
+      experiment = TestWrangler::Experiment.new('facebook_signup', [:signup_on_cya])
+      TestWrangler.save_experiment(experiment)
+      TestWrangler.activate_experiment(experiment)
+      experiment
+    end
+    
+    let(:cohort) do
+      cohort = TestWrangler::Cohort.new('facebook', [{type: :query_parameters, query_parameters: {'UTM_SOURCE'=>'facebook'}}])
+      TestWrangler.save_cohort(cohort)
+      cohort
+    end
+
+    context 'when active experiments have been added to the cohort' do
+      before do
+        TestWrangler.add_experiment_to_cohort(experiment, cohort)
+      end
+      it 'returns a list of experiment names' do
+        expect(TestWrangler.active_cohort_experiments(cohort)).to eq(['facebook_signup'])
+      end
+    end
+
+    context 'when no active experiments have been added to the cohort' do
+      it 'returns an empty list' do
+        expect(TestWrangler.active_cohort_experiments(cohort)).to be_empty
+      end
+    end
+
+    context 'when the cohort does not exist' do
+      it 'returns false' do
+        expect(TestWrangler.active_cohort_experiments('random')).to eq(false)
+      end
+    end
+  end
+
+  describe '::experiment_cohorts(experiment_name)' do
+    let(:experiment) do
+      experiment = TestWrangler::Experiment.new('facebook_signup', [:signup_on_cya])
+      TestWrangler.save_experiment(experiment)
+      experiment
+    end
+    
+    let(:cohort) do
+      cohort = TestWrangler::Cohort.new('facebook', [{type: :query_parameters, query_parameters: {'UTM_SOURCE'=>'facebook'}}])
+      TestWrangler.save_cohort(cohort)
+      cohort
+    end
+
+    context 'when the experiment has been added to cohorts' do
+      before do
+        TestWrangler.add_experiment_to_cohort(experiment, cohort)
+      end
+      it 'returns a list of cohort names' do
+        expect(TestWrangler.experiment_cohorts(experiment)).to eq(['facebook'])
+      end
+    end
+
+    context 'when the experiment has not been added to cohorts' do
+      it 'returns an empty list' do
+        expect(TestWrangler.experiment_cohorts(experiment)).to be_empty
+      end
+    end
+
+    context 'when the experiment does not exist' do
+      it 'returns false' do
+        expect(TestWrangler.experiment_cohorts('random')).to eq(false)
+      end
+    end
+  end
+
   describe '::remove_experiment(experiment)' do
     let(:experiment) do
       experiment = TestWrangler::Experiment.new('facebook_signup', [:signup_on_cya])
@@ -278,6 +371,23 @@ describe TestWrangler do
       end
       it 'removes the experiment from redis' do
         expect{TestWrangler.remove_experiment(experiment)}.to change{TestWrangler.experiment_exists?(experiment)}.from(true).to(false)
+      end
+
+      context 'when the experiment was attached to a cohort' do
+        before do
+          cohort = TestWrangler::Cohort.new('facebook', [{type: :query_parameters, query_parameters: {'UTM_SOURCE'=>'facebook'}}])
+          TestWrangler.save_cohort(cohort)
+          TestWrangler.add_experiment_to_cohort(experiment, cohort)
+        end
+
+        it "removes the experiment from the cohort" do
+          expect{TestWrangler.remove_experiment(experiment)}.to change{TestWrangler.cohort_experiments('facebook')}
+        end
+
+        it "deactivates the experiment with the cohort if it was active" do
+          TestWrangler.activate_experiment(experiment)
+          expect{TestWrangler.remove_experiment(experiment)}.to change{TestWrangler.active_cohort_experiments('facebook')}
+        end
       end
     end
 
@@ -294,10 +404,19 @@ describe TestWrangler do
       expect(TestWrangler.activate_experiment(experiment)).to eq(false)
       expect(TestWrangler.experiment_active?(experiment)).to eq(false)
     end
+    
     it "if the experiment exists in redis it returns true" do
       TestWrangler.save_experiment(experiment)
       expect(TestWrangler.activate_experiment(experiment)).to eq(true)
       expect(TestWrangler.experiment_active?(experiment)).to eq(true)
+    end
+
+    it "activates the experiment with any cohort it belongs to" do
+      TestWrangler.save_experiment(experiment)
+      cohort = TestWrangler::Cohort.new('facebook', [{type: :query_parameters, query_parameters: {'UTM_SOURCE'=>'facebook'}}])
+      TestWrangler.save_cohort(cohort)
+      TestWrangler.add_experiment_to_cohort(experiment, cohort)
+      expect{TestWrangler.activate_experiment(experiment)}.to change{TestWrangler.active_cohort_experiments(cohort)}
     end
   end
 
@@ -311,6 +430,14 @@ describe TestWrangler do
       TestWrangler.activate_experiment(experiment)
       expect(TestWrangler.deactivate_experiment(experiment)).to eq(true)
       expect(TestWrangler.experiment_active?(experiment)).to eq(false)
+    end
+    it "deactivates the experiment with any cohort it belongs to" do
+      TestWrangler.save_experiment(experiment)
+      cohort = TestWrangler::Cohort.new('facebook', [{type: :query_parameters, query_parameters: {'UTM_SOURCE'=>'facebook'}}])
+      TestWrangler.save_cohort(cohort)
+      TestWrangler.add_experiment_to_cohort(experiment, cohort)
+      TestWrangler.activate_experiment(experiment)
+      expect{TestWrangler.deactivate_experiment(experiment)}.to change{TestWrangler.active_cohort_experiments(cohort)}
     end
   end
 
