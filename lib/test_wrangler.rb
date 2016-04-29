@@ -25,8 +25,17 @@ module TestWrangler
     ENV["TEST_WRANGLER"] == 'on'
   end
 
-  def assignment_for(env)
-  end
+  # def assignment_for(env)
+  #   cohort = active_cohorts([nil]).find do |data|
+  #     instance = TestWrangler::Cohort.deserialize(data)
+  #     instance.match?(env)
+  #   end
+  #   if cohort_name = cohort[0] && experiment_name = rotate_cohort_experiments(cohort_name) && variant_name = next_variant_for(experiment_name)
+  #     {cohort: cohort_name, experiment: experiment_name, variant: variant_name}
+  #   else
+  #     nil
+  #   end
+  # end
 
   def active_cohorts
     cohort_names = redis.smembers('cohorts') rescue []
@@ -38,7 +47,7 @@ module TestWrangler
       end
       arr
     end
-    cohorts.sort{|a, b| a[1] <=> b[1]}
+    cohorts.empty? ? cohorts : cohorts.sort{|a, b| a[1] <=> b[1]}
   end
 
   def cohort_exists?(cohort_name)
@@ -138,6 +147,13 @@ module TestWrangler
     cohort_name = cohort_name.name if cohort_name.is_a? TestWrangler::Cohort
     return false if !cohort_exists?(cohort_name)
     redis.lrange("cohorts:#{cohort_name}:active_experiments", 0, -1) rescue []
+  end
+
+  def rotate_cohort_experiments(cohort_name)
+    cohort_name = cohort_name.name if cohort_name.is_a? TestWrangler::Cohort
+    return false if !cohort_exists?(cohort_name)
+    key = "cohorts:#{cohort_name}:active_experiments"
+    redis.rpoplpush(key, key) rescue nil
   end
 
   def cohort_experiments(cohort_name)

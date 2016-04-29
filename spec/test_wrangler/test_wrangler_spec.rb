@@ -323,6 +323,62 @@ describe TestWrangler do
     end
   end
 
+  describe '::rotate_cohort_experiments(cohort_name)' do
+    let(:experiment1) do
+      experiment = TestWrangler::Experiment.new('facebook_signup', [:signup_on_cya])
+      TestWrangler.save_experiment(experiment)
+      TestWrangler.activate_experiment(experiment)
+      experiment
+    end
+
+    let(:experiment2) do
+      experiment = TestWrangler::Experiment.new('the_copy', [:new_copy])
+      TestWrangler.save_experiment(experiment)
+      TestWrangler.activate_experiment(experiment)
+      experiment
+    end
+
+    let(:cohort) do
+      cohort = TestWrangler::Cohort.new('facebook', 0, [{type: :query_parameters, query_parameters: {'UTM_SOURCE'=>'facebook'}}])
+      TestWrangler.save_cohort(cohort)
+      cohort
+    end
+
+    context 'when the cohort does not exist' do
+      it 'returns false' do
+        expect(TestWrangler.rotate_cohort_experiments('random')).to eq(false)
+      end
+    end
+
+    context 'when the cohort has a single active experiment' do
+      before do
+        TestWrangler.add_experiment_to_cohort(experiment1, cohort)
+      end
+      it 'always returns that experiment name' do
+        2.times{ expect(TestWrangler.rotate_cohort_experiments(cohort)).to eq('facebook_signup')}
+      end
+    end
+
+    context 'when the cohort has more than one active experiment' do
+      before do
+        TestWrangler.add_experiment_to_cohort(experiment1, cohort)
+        TestWrangler.add_experiment_to_cohort(experiment2, cohort)
+      end
+
+      it 'rotates the experiments and returns the experiment that was at the tail of the list' do
+        expect(TestWrangler.rotate_cohort_experiments(cohort)).to eq('the_copy')
+        expect(TestWrangler.rotate_cohort_experiments(cohort)).to eq('facebook_signup')
+        expect(TestWrangler.rotate_cohort_experiments(cohort)).to eq('the_copy')
+      end
+    end
+
+    context 'when the cohort has no active experiments' do
+      it 'returns nil' do
+        expect(TestWrangler.rotate_cohort_experiments(cohort)).to be_nil
+      end
+    end
+  end
+
   describe '::experiment_cohorts(experiment_name)' do
     let(:experiment) do
       experiment = TestWrangler::Experiment.new('facebook_signup', [:signup_on_cya])
