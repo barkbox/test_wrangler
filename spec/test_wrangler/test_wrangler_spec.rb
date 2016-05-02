@@ -521,4 +521,70 @@ describe TestWrangler do
     end
   end
 
+  describe '::next_variant_for?(experiment_name)' do
+
+  end
+
+  describe '::experiment_participation(experiment_name, variant_name=nil)' do
+    before do
+      experiment = TestWrangler::Experiment.new('facebook_signup', [:signup_on_cya])
+      TestWrangler.save_experiment(experiment)
+      TestWrangler.activate_experiment(experiment)
+      5.times{ TestWrangler.increment_experiment_participation(experiment, 'signup_on_cya')}
+    end
+    
+    context 'if the experiment does not exist' do
+      it "returns false" do
+        expect(TestWrangler.experiment_participation('random','random')).to eq(false)
+      end
+    end
+
+    context 'with no variant' do
+      it "returns the participant count for the overall experiment" do
+        expect(TestWrangler.experiment_participation('facebook_signup')).to eq(5)
+      end
+    end
+
+    context 'with a variant specified' do
+      context 'when the variant exists' do
+        it 'returns the participant count for the variant' do
+          expect(TestWrangler.experiment_participation('facebook_signup', 'signup_on_cya')).to eq(5)
+        end
+      end
+
+      context 'when the variant does not exist' do
+        it 'returns false' do
+          expect(TestWrangler.experiment_participation('facebook_signup', 'random')).to eq(false)
+        end
+      end
+    end
+  end
+
+  describe '::increment_experiment_participation(experiment_name, variant_name)' do
+    before do
+      experiment = TestWrangler::Experiment.new('facebook_signup', [:signup_on_cya])
+      TestWrangler.save_experiment(experiment)
+      TestWrangler.activate_experiment(experiment)
+    end
+
+    context 'if the experiment does not exist' do
+      it "returns false" do
+        expect(TestWrangler.increment_experiment_participation('random','random')).to eq(false)
+      end
+    end
+
+    context 'if the variant does not exist on the experiment' do
+      it 'returns false' do
+        expect(TestWrangler.increment_experiment_participation('facebook_signup', 'random')).to eq(false)
+      end
+    end
+
+    context 'if the variant and experiment exist' do
+      it 'increments the participation count for the experiment and the variant' do
+        expect{TestWrangler.increment_experiment_participation('facebook_signup', 'signup_on_cya')}.to change{TestWrangler.experiment_participation('facebook_signup', 'signup_on_cya')}
+      end
+    end
+
+  end
+
 end

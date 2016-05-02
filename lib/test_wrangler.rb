@@ -25,12 +25,15 @@ module TestWrangler
     ENV["TEST_WRANGLER"] == 'on'
   end
 
+  def assignment_for(env)
+  end
   # def assignment_for(env)
   #   cohort = active_cohorts([nil]).find do |data|
   #     instance = TestWrangler::Cohort.deserialize(data)
   #     instance.match?(env)
   #   end
   #   if cohort_name = cohort[0] && experiment_name = rotate_cohort_experiments(cohort_name) && variant_name = next_variant_for(experiment_name)
+  #     increment_experiment_participation(experiment_name, variant_name)
   #     {cohort: cohort_name, experiment: experiment_name, variant: variant_name}
   #   else
   #     nil
@@ -142,6 +145,32 @@ module TestWrangler
       false
     end
   end
+
+  def increment_experiment_participation(experiment_name, variant_name)
+    experiment_name = experiment_name.name if experiment_name.is_a? TestWrangler::Experiment
+    return false if !experiment_exists?(experiment_name)
+    variant_exists = redis.hexists("experiments:#{experiment_name}", variant_name) rescue false
+    return false if !variant_exists
+    redis.multi do
+      redis.hincrby("experiments:#{experiment_name}", "participant_count", 1)
+      redis.hincrby("experiments:#{experiment_name}", "#{variant_name}:participant_count", 1)
+    end
+    true
+  end
+
+  def experiment_participation(experiment_name, variant_name=nil)
+    experiment_name = experiment_name.name if experiment_name.is_a? TestWrangler::Experiment
+    return false if !experiment_exists?(experiment_name)
+    if variant_name
+      return false unless redis.hexists("experiments:#{experiment_name}", variant_name) rescue false
+      count = redis.hget("experiments:#{experiment_name}", "#{variant_name}:participant_count")
+      count ? count.to_i : 0
+    else
+      count = redis.hget("experiments:#{experiment_name}", "participant_count")
+      count ? count.to_i : 0
+    end
+  end
+
 
   def active_cohort_experiments(cohort_name)
     cohort_name = cohort_name.name if cohort_name.is_a? TestWrangler::Cohort
