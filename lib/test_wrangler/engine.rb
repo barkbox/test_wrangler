@@ -6,5 +6,9 @@ module TestWrangler
       app.middleware.use TestWrangler::Middleware
     end
 
+    intializer "test_wrangler.bootstrap_helper" do |app|
+      ActionController::Base.send :include, TestWrangler::Helper
+      ActionController::Base.helper TestWrangler::Helper
+    end
   end
 end

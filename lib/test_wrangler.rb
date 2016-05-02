@@ -5,6 +5,7 @@ require 'test_wrangler/config'
 require 'test_wrangler/experiment'
 require 'test_wrangler/cohort'
 require 'test_wrangler/middleware'
+require 'test_wrangler/helper'
 require 'test_wrangler/engine'
 
 module TestWrangler
