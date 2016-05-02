@@ -75,4 +75,14 @@ describe TestWrangler::Middleware do
       it_behaves_like "it does not modify response cookies"
     end
   end
+
+  context 'if an error is raised' do
+    let(:env){Rack::MockRequest.env_for('https://barkbox.com')}
+
+    before do
+      allow(TestWrangler).to receive(:assignment_for){raise Redis::BaseError}
+    end
+
+    it_behaves_like "it does not modify response cookies"
+  end
 end

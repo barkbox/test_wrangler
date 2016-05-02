@@ -29,7 +29,9 @@ module TestWrangler
           app.call(env)
         end
       end
-    end
 
+      rescue Redis::BaseError
+        app.call(env)
+    end
   end
 end
