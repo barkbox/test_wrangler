@@ -21,6 +21,23 @@ describe TestWrangler do
     end
   end
 
+  describe '::valid_request_path?(path)' do
+    before do
+      TestWrangler.config do |config|
+        config.exclude_paths "/api"
+      end
+    end
+
+    it 'returns true if the path does not match any paths excluded in the config' do
+      expect(TestWrangler.valid_request_path?('/some/great/path')).to eq(true)
+      expect(TestWrangler.valid_request_path?('/some/api/path')).to eq(true)
+    end
+
+    it 'returns false if the path matches any paths excluded in the config' do
+      expect(TestWrangler.valid_request_path?('/api/v2/whatever')).to eq(false)
+    end
+  end
+
   describe '::save_cohort(cohort)' do
     let(:cohort){TestWrangler::Cohort.new('facebook', 0, [{type: :query_parameters, query_parameters: {'UTM_SOURCE'=>'facebook'}}])}
     context 'when the cohort has a unique name' do

@@ -25,6 +25,10 @@ module TestWrangler
     ENV["TEST_WRANGLER"] == 'on'
   end
 
+  def valid_request_path?(path)
+    !config.exclude_paths.any?{|p| p =~ path}
+  end
+
   def assignment_for(env)
     cohort = active_cohorts.find do |data|
       instance = TestWrangler::Cohort.deserialize(data)
