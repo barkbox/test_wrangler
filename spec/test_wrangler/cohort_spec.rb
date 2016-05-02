@@ -37,7 +37,7 @@ describe TestWrangler::Cohort do
     end
   end
 
-  describe '==(other)' do
+  describe '#==(other)' do
     it 'returns true if the other object is a Cohort and #serialize is equivalent' do
       cohort = TestWrangler::Cohort.new('mobile', 0, [{type: :user_agent, user_agent: [/Mobi/, /snuffle/]}])
       cohort2 = TestWrangler::Cohort.new('mobile', 0, [{type: :user_agent, user_agent: [/Mobi/, /snuffle/]}])
@@ -45,7 +45,7 @@ describe TestWrangler::Cohort do
     end
   end
 
-  describe 'hash' do
+  describe '#hash' do
     it 'uses the hash of the serialized version of the cohort to establish equivalence' do
       cohort = TestWrangler::Cohort.new('mobile', 0, [{type: :user_agent, user_agent: [/Mobi/, /snuffle/]}])
       cohort2 = TestWrangler::Cohort.new('mobile', 0, [{type: :user_agent, user_agent: [/Mobi/, /snuffle/]}])
@@ -53,7 +53,7 @@ describe TestWrangler::Cohort do
     end
   end
 
-  describe '<=>(other)' do
+  describe '#<=>(other)' do
     it 'compares cohorts according to their priority' do
       cohort = TestWrangler::Cohort.new('mobile', 0, [{type: :user_agent, user_agent: [/Mobi/, /snuffle/]}])
       cohort2 = TestWrangler::Cohort.new('facebook', 0, [{type: :user_agent, user_agent: [/Mobi/, /snuffle/]}])
