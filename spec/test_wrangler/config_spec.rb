@@ -65,4 +65,20 @@ describe TestWrangler::Config do
     end
   end
 
+  describe '#exclude_paths(*paths)' do
+    context 'with a list of strings and/or regexps' do
+      it 'sets the exclusion paths to an array of regexps' do
+        output = config.exclude_paths('/api', /^\/butt/)
+        expect(output).to eq(config.exclude_paths)
+        expect(config.exclude_paths).to eq([/^\/api/, /^\/butt/])
+      end
+    end
+
+    context 'without an argument' do
+      it 'returns an empty array' do
+        expect(config.exclude_paths).to eq([])
+      end
+    end
+  end
+
 end
