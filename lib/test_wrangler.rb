@@ -171,6 +171,35 @@ module TestWrangler
     end
   end
 
+  def next_variant_for(experiment_name)
+    experiment_name = experiment_name.name if experiment_name.is_a? TestWrangler::Experiment
+    return false if !experiment_exists?(experiment_name)
+    experiment_config = redis.hgetall("experiments:#{experiment_name}")
+    experiment_config.delete("state")
+    participant_count = experiment_config.delete('participant_count') || 0.0
+    participant_count = participant_count.to_f
+
+    weights = experiment_config.reduce({}) do |h, (k,v)|
+      next h if k.include?(':participant_count')
+      h[k] = v
+      experiment_config.delete(k)
+      h
+    end
+
+    if participant_count == 0.0
+      weights.max_by {|k,v| v.to_f }[0]
+    else
+      diffs = weights.inject({}) do |h, (k,v)|
+        count = experiment_config["#{k}:participant_count"]
+        count = count.nil? ? 0.0 : count.to_f
+        proportion = count / participant_count
+        diff = proportion - v.to_f
+        h[k] = diff
+        h
+      end
+      diffs.min_by{|k,v| v }[0]
+    end
+  end
 
   def active_cohort_experiments(cohort_name)
     cohort_name = cohort_name.name if cohort_name.is_a? TestWrangler::Cohort

@@ -521,8 +521,83 @@ describe TestWrangler do
     end
   end
 
-  describe '::next_variant_for?(experiment_name)' do
+  describe '::next_variant_for(experiment_name)' do
+    context 'when the experiment does not exist' do
+      it 'returns false' do
+        expect(TestWrangler.next_variant_for('random')).to eq(false)
+      end
+    end
 
+    context 'when variants have different weights' do
+      before do
+        experiment = TestWrangler::Experiment.new('facebook_signup', [{a_big_variant: 0.75}, {a_smaller_variant: 0.2}, {a_small_variant: 0.05}])
+        TestWrangler.save_experiment(experiment)
+        TestWrangler.activate_experiment(experiment)
+      end
+
+      context 'when no participants have been registered' do
+        it 'picks the highest weighted variant' do
+          expect(TestWrangler.next_variant_for('facebook_signup')).to eq('a_big_variant')
+        end
+      end
+
+      context 'when all variants have proportional participation' do
+        before do
+          75.times{TestWrangler.increment_experiment_participation('facebook_signup', 'a_big_variant')}
+          20.times{TestWrangler.increment_experiment_participation('facebook_signup', 'a_smaller_variant')}
+          5.times{TestWrangler.increment_experiment_participation('facebook_signup', 'a_small_variant')}
+        end
+
+        it 'picks the highest weighted variant' do
+          expect(TestWrangler.next_variant_for('facebook_signup')).to eq('a_big_variant')
+        end
+      end
+
+      context 'when participation is not balanced' do
+        before do
+          75.times{TestWrangler.increment_experiment_participation('facebook_signup', 'a_big_variant')}
+          20.times{TestWrangler.increment_experiment_participation('facebook_signup', 'a_smaller_variant')}
+        end
+
+        it 'picks the variant with the greatest deficit' do
+          expect(TestWrangler.next_variant_for('facebook_signup')).to eq('a_small_variant')
+        end
+      end
+    end
+
+    context 'when all variants have the same weight' do
+      before do
+        experiment = TestWrangler::Experiment.new('facebook_signup', [:variant_1, :variant_2, :variant_3, :variant_4])
+        TestWrangler.save_experiment(experiment)
+        TestWrangler.activate_experiment(experiment)
+      end
+
+      context 'when no participants have been registered' do
+        it "picks the first variant" do
+          expect(TestWrangler.next_variant_for('facebook_signup')).to eq('variant_1')
+        end
+      end
+
+      context 'when all variants have equal participation' do
+        before do
+          4.times{TestWrangler.increment_experiment_participation('facebook_signup', TestWrangler.next_variant_for('facebook_signup'))}
+        end
+
+        it "picks the first variant" do
+          expect(TestWrangler.next_variant_for('facebook_signup')).to eq('variant_1')
+        end
+      end
+
+      context 'when participation is unbalanced' do
+        before do
+          3.times{TestWrangler.increment_experiment_participation('facebook_signup', TestWrangler.next_variant_for('facebook_signup'))}
+        end
+        it "picks the experiment with the biggest diff" do
+          expect(TestWrangler.next_variant_for('facebook_signup')).to eq('variant_4')
+        end
+      end
+
+    end
   end
 
   describe '::experiment_participation(experiment_name, variant_name=nil)' do
