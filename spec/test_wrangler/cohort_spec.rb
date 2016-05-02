@@ -53,6 +53,17 @@ describe TestWrangler::Cohort do
     end
   end
 
+  describe '<=>(other)' do
+    it 'compares cohorts according to their priority' do
+      cohort = TestWrangler::Cohort.new('mobile', 0, [{type: :user_agent, user_agent: [/Mobi/, /snuffle/]}])
+      cohort2 = TestWrangler::Cohort.new('facebook', 0, [{type: :user_agent, user_agent: [/Mobi/, /snuffle/]}])
+      cohort3 = TestWrangler::Cohort.new('twitter', 1, [{type: :user_agent, user_agent: [/Mobi/, /snuffle/]}])
+      expect(cohort <=> cohort2).to eq(0)
+      expect(cohort <=> cohort3).to eq(-1)
+      expect(cohort3 <=> cohort2).to eq(1)
+    end
+  end
+
   describe '#serialize' do
     it "outputs a data structure that can be used for persistence" do
       cohort = TestWrangler::Cohort.new('mobile', 0, [{type: :user_agent, user_agent: [/Mobi/, /snuffle/]}, {type: :cookies, cookies: [{'this' => 'that'}]}])
