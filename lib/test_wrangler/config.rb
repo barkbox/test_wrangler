@@ -9,14 +9,6 @@ module TestWrangler
       @root_key ||= key_name ? key_name : :test_wrangler
     end
 
-    def experiments_directory(dirname=nil)
-      @experiments_directory ||= dirname ? dirname : ::Rails.root.join('config', 'test_wrangler', 'experiments')
-    end
-
-    def cohorts_directory(dirname=nil)
-      @cohorts_directory ||= dirname ? dirname : ::Rails.root.join('config', 'test_wrangler', 'cohorts')
-    end
-
     def exclude_paths(*paths)
       return @exclude_paths if defined? @exclude_paths
       paths = [paths].flatten
