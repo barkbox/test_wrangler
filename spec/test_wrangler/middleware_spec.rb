@@ -17,6 +17,17 @@ describe TestWrangler::Middleware do
     it_behaves_like "it does not modify response cookies"
   end
 
+  context 'if the path is excluded' do
+    let(:env){Rack::MockRequest.env_for('https://barkbox.com/api/v2/orders')}
+    before do
+      TestWrangler.config do |config|
+        config.exclude_paths '/api'
+      end
+    end
+
+    it_behaves_like "it does not modify response cookies"
+  end
+
   context 'if a test wrangler cookie is set' do
 
     context 'if the indicated experiment is still running' do

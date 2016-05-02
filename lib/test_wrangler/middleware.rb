@@ -7,7 +7,7 @@ module TestWrangler
     end
 
     def call(env)
-      return app.call(env) unless TestWrangler.active?
+      return app.call(env) unless TestWrangler.active? && TestWrangler.valid_request_path?(env['REQUEST_PATH'])
 
       req = Rack::Request.new(env)
       tw_cookie = JSON.parse(req.cookies['test_wrangler']) rescue nil
