@@ -600,6 +600,45 @@ describe TestWrangler do
     end
   end
 
+  describe '::assignment_for(env)' do
+    let(:env){{'QUERY_STRING' => 'UTM_SOURCE=facebook'}}
+    
+    context 'when the provided request matches an active cohort with active experiments' do
+      before do
+        cohort = TestWrangler::Cohort.new('facebook', 0, [{type: :query_parameters, query_parameters: {'UTM_SOURCE' => 'facebook'}}])
+        TestWrangler.save_cohort(cohort)
+        experiment = TestWrangler::Experiment.new('facebook_signup', [:control, :signup_on_cya])
+        TestWrangler.save_experiment(experiment)
+        TestWrangler.activate_experiment(experiment)
+        TestWrangler.add_experiment_to_cohort(experiment, cohort)
+        TestWrangler.activate_cohort(cohort)
+      end
+
+      it "returns a selection hash" do
+        expect(TestWrangler.assignment_for(env)).to eq({cohort: 'facebook', experiment: 'facebook_signup', variant: 'control'})
+      end
+
+    end
+
+    context 'when the provided request matches no active cohort' do
+      it "returns nil" do
+        expect(TestWrangler.assignment_for(env)).to be_nil
+      end
+    end
+
+    context 'when the provided request matches an active cohort which has no active experiments' do      
+      before do
+        cohort = TestWrangler::Cohort.new('facebook', 0, [{type: :query_parameters, query_parameters: {'UTM_SOURCE' => 'facebook'}}])
+        TestWrangler.save_cohort(cohort)
+        TestWrangler.activate_cohort(cohort)
+      end
+
+      it "returns nil" do
+        expect(TestWrangler.assignment_for(env)).to be_nil
+      end
+    end
+  end
+
   describe '::experiment_participation(experiment_name, variant_name=nil)' do
     before do
       experiment = TestWrangler::Experiment.new('facebook_signup', [:signup_on_cya])

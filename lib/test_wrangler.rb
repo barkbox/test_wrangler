@@ -26,19 +26,17 @@ module TestWrangler
   end
 
   def assignment_for(env)
+    cohort = active_cohorts.find do |data|
+      instance = TestWrangler::Cohort.deserialize(data)
+      instance.match?(env)
+    end
+    if cohort && (experiment_name = rotate_cohort_experiments(cohort[0])) && (variant_name = next_variant_for(experiment_name))
+      increment_experiment_participation(experiment_name, variant_name)
+      {cohort: cohort[0], experiment: experiment_name, variant: variant_name}
+    else
+      nil
+    end
   end
-  # def assignment_for(env)
-  #   cohort = active_cohorts([nil]).find do |data|
-  #     instance = TestWrangler::Cohort.deserialize(data)
-  #     instance.match?(env)
-  #   end
-  #   if cohort_name = cohort[0] && experiment_name = rotate_cohort_experiments(cohort_name) && variant_name = next_variant_for(experiment_name)
-  #     increment_experiment_participation(experiment_name, variant_name)
-  #     {cohort: cohort_name, experiment: experiment_name, variant: variant_name}
-  #   else
-  #     nil
-  #   end
-  # end
 
   def active_cohorts
     cohort_names = redis.smembers('cohorts') rescue []

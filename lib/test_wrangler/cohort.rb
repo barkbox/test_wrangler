@@ -15,8 +15,9 @@ module TestWrangler
 
     def criteria
       @criteria ||= @original_criteria.map do |criterion|
-        criterion_class = TestWrangler::Cohort.type_to_criterion_class(criterion[:type])
-        criterion_class.new(criterion[criterion[:type]])
+        criterion.stringify_keys!
+        criterion_class = TestWrangler::Cohort.type_to_criterion_class(criterion['type'])
+        criterion_class.new(criterion[criterion['type'].to_s])
       end
     end
 
