@@ -95,5 +95,19 @@ describe TestWrangler::Middleware do
     end
 
     it_behaves_like "it does not modify response cookies"
+
+    context 'if a logger is set in the config' do
+      before do
+        @logger = Logger.new(STDOUT)
+        TestWrangler.config do |config|
+          config.logger @logger
+        end
+      end
+
+      it 'logs the error' do
+        expect(@logger).to receive(:error).with(Redis::BaseError)
+        middleware.call(env)
+      end
+    end
   end
 end

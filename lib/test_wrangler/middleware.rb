@@ -30,7 +30,10 @@ module TestWrangler
         end
       end
 
-      rescue Redis::BaseError
+      rescue Redis::BaseError => e
+        unless TestWrangler.logger.nil?
+          TestWrangler.logger.error(e)
+        end
         app.call(env)
     end
   end

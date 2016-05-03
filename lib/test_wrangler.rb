@@ -22,6 +22,10 @@ module TestWrangler
     @redis ||= Redis::Namespace.new(config.root_key, redis: config.redis)
   end
 
+  def logger
+    @logger ||= config.logger
+  end
+
   def active?
     ENV["TEST_WRANGLER"] == 'on'
   end
