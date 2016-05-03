@@ -3,8 +3,12 @@ module TestWrangler
     BLANK_SELECTION = HashWithIndifferentAccess.new({cohort: nil, experiment: nil, variant: nil})
     
     def test_wrangler_selection
+      TestWrangler.logger.info("Selection instance var:")
+      TestWrangler.logger.info(@test_wrangler_selection)
       return @test_wrangler_selection if defined? @test_wrangler_selection
       if cookies['test_wrangler']
+        TestWrangler.logger.info("Cookie value:")
+        TestWrangler.logger.info(cookies['test_wrangler'])
         @test_wrangler_selection = HashWithIndifferentAccess.new(JSON.parse(Rack::Utils.unescape(cookies['test_wrangler']))) rescue BLANK_SELECTION
       else
         @test_wrangler_selection = BLANK_SELECTION
