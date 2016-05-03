@@ -10,9 +10,19 @@ describe TestWrangler::Helper do
       end
     end
 
-    context 'when a selection is set in the cookies' do
+    context 'when a selection is set in the request cookies' do
       before do
         @request.cookies['test_wrangler'] = Rack::Utils.escape(JSON.generate({cohort: 'base', experiment: 'facebook_signup', variant: 'control'}))
+      end
+
+      it 'returns the selection from the cookies' do
+        expect(helper.test_wrangler_selection).to eq(HashWithIndifferentAccess.new({cohort: 'base', experiment: 'facebook_signup', variant: 'control'}))
+      end
+    end
+
+    context 'when a selection is set in the env' do
+      before do
+        @request.env['test_wrangler'] = {cohort: 'base', experiment: 'facebook_signup', variant: 'control'}
       end
 
       it 'returns the selection from the cookies' do

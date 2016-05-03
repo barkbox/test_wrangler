@@ -39,7 +39,9 @@ describe TestWrangler::Middleware do
         encoded = Rack::Utils.escape(json)
         Rack::MockRequest.env_for('https://barkbox.com', {'HTTP_COOKIE' => "test_wrangler=#{encoded}"})
       end
+
       it_behaves_like "it does not modify response cookies"
+      it_behaves_like "it sets the env"
     end
 
     context 'if the indicated experiment has ended or does not exist' do
@@ -56,8 +58,10 @@ describe TestWrangler::Middleware do
           allow(TestWrangler).to receive(:assignment_for){{"cohort"=>"base", "experiment"=>"new_copy", "variant"=>"delightful"}}
         end
 
+        it_behaves_like "it sets the env"
         it_behaves_like "it assigns the response cookie"
       end
+      
       context 'if no experiments are running for the request cohort' do
         before do
           allow(TestWrangler).to receive(:experiment_active?).with('facebook_signup'){false}
@@ -76,6 +80,7 @@ describe TestWrangler::Middleware do
         allow(TestWrangler).to receive(:assignment_for){{"cohort"=>"base", "experiment"=>"new_copy", "variant"=>"delightful"}}
       end
 
+      it_behaves_like "it sets the env"
       it_behaves_like "it assigns the response cookie"
     end
     context 'if the request is not eligible for enrollment in an active experiment' do

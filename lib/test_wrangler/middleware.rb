@@ -10,11 +10,13 @@ module TestWrangler
       return app.call(env) unless TestWrangler.active? && TestWrangler.valid_request_path?(env['REQUEST_PATH'])
 
       req = Rack::Request.new(env)
-      tw_cookie = JSON.parse(req.cookies['test_wrangler']) rescue nil
+      tw_cookie = JSON.parse(req.cookies['test_wrangler']).with_indifferent_access rescue nil
 
       if tw_cookie && TestWrangler.experiment_active?(tw_cookie['experiment'])
+        env['test_wrangler'] = tw_cookie
         app.call(env)
       elsif assignment = TestWrangler.assignment_for(env)
+        env['test_wrangler'] = assignment
         status, headers, body = app.call(env)
         resp = Rack::Response.new(body, status, headers)
         resp.set_cookie('test_wrangler', Rack::Utils.escape(assignment.to_json))

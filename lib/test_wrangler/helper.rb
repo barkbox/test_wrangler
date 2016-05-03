@@ -6,6 +6,8 @@ module TestWrangler
       return @test_wrangler_selection if defined? @test_wrangler_selection
       if cookies['test_wrangler']
         @test_wrangler_selection = HashWithIndifferentAccess.new(JSON.parse(Rack::Utils.unescape(cookies['test_wrangler']))) rescue BLANK_SELECTION
+      elsif request.env['test_wrangler'].present?
+        @test_wrangler_selection = request.env['test_wrangler'].with_indifferent_access
       else
         @test_wrangler_selection = BLANK_SELECTION
       end

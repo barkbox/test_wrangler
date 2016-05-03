@@ -10,6 +10,12 @@ shared_examples "it does not modify response cookies" do
   end
 end
 
+shared_examples "it sets the env" do
+  it "should have a selection set in the env for test_wrangler" do
+    expect{middleware.call(env)}.to change{env['test_wrangler']}
+  end
+end
+
 shared_examples "it unsets the response cookie" do
   it "should set a remove cookie for test_wrangler" do
     status, headers, body = middleware.call(env)
