@@ -1,6 +1,5 @@
 require 'rails_helper'
 require 'test_wrangler/helper'
-require 'pry'
 
 describe TestWrangler::Helper do
   
