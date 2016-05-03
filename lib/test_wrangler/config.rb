@@ -9,6 +9,10 @@ module TestWrangler
       @root_key ||= key_name ? key_name : :test_wrangler
     end
 
+    def logger(logger=nil)
+      @logger ||= logger
+    end
+
     def exclude_paths(*paths)
       return @exclude_paths if defined? @exclude_paths
       paths = [paths].flatten

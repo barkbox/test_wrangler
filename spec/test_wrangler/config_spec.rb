@@ -51,4 +51,20 @@ describe TestWrangler::Config do
     end
   end
 
+  describe '#logger(logger=nil)' do
+    context 'with an argument' do
+      it 'sets the logger' do
+        logger = Logger.new(STDOUT)
+        config.logger logger
+        expect(config.logger).to eq(logger)
+      end
+    end
+
+    context 'without an argument' do
+      it 'returns nil' do
+        expect(config.logger).to be_nil
+      end
+    end  
+  end
+
 end
