@@ -12,7 +12,7 @@ describe TestWrangler::Helper do
 
     context 'when a selection is set in the cookies' do
       before do
-        @request.cookies['test_wrangler'] = JSON.generate({cohort: 'base', experiment: 'facebook_signup', variant: 'control'})
+        @request.cookies['test_wrangler'] = Rack::Utils.escape(JSON.generate({cohort: 'base', experiment: 'facebook_signup', variant: 'control'}))
       end
 
       it 'returns the selection from the cookies' do

@@ -5,7 +5,7 @@ module TestWrangler
     def test_wrangler_selection
       return @test_wrangler_selection if defined? @test_wrangler_selection
       if cookies['test_wrangler']
-        @test_wrangler_selection = HashWithIndifferentAccess.new(JSON.parse(cookies['test_wrangler'])) rescue BLANK_SELECTION
+        @test_wrangler_selection = HashWithIndifferentAccess.new(JSON.parse(Rack::Utils.unescape(cookies['test_wrangler']))) rescue BLANK_SELECTION
       else
         @test_wrangler_selection = BLANK_SELECTION
       end
