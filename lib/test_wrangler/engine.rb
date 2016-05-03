@@ -6,6 +6,7 @@ module TestWrangler
       app.middleware.use TestWrangler::Middleware
       ActionController::Base.send :include, TestWrangler::Helper
       ActionController::Base.helper TestWrangler::Helper
+      ActionController::Base.helper_method :test_wrangler_selection, :complete_experiment
     end
   end
 end
