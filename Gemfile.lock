@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    test_wrangler (0.0.2)
+    test_wrangler (0.0.3)
       rails
       redis (~> 3.2.0)
       redis-namespace (~> 1.5.2)
