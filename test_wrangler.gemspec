@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.email       = ["erik@barkbox.com"]
   s.homepage    = "TODO"
   s.summary     = "TestWrangler is an A/B testing plugin for Rails"
-  s.description = "TODO: Description of TestWrangler."
+  s.description = "Redis backed A/B testing platform"
   s.license     = "MIT"
 
   s.files = Dir["{app,config,db,lib}/**/*", "MIT-LICENSE", "Rakefile", "README.rdoc"]
