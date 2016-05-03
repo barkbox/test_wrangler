@@ -5,7 +5,7 @@ module TestWrangler
         attr_reader :rules
         
         def initialize(*rules)
-          @rules = rules.flatten
+          @rules = [rules].flatten
         end
 
         def self.deserialize(array)
