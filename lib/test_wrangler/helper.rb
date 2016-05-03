@@ -4,7 +4,7 @@ module TestWrangler
     
     def test_wrangler_selection
       return @test_wrangler_selection if defined? @test_wrangler_selection
-      if cookies['test_wrangler']
+      if cookies['test_wrangler'].present?
         @test_wrangler_selection = HashWithIndifferentAccess.new(JSON.parse(Rack::Utils.unescape(cookies['test_wrangler']))) rescue BLANK_SELECTION
       elsif request.env['test_wrangler'].present?
         @test_wrangler_selection = request.env['test_wrangler'].with_indifferent_access
@@ -15,7 +15,7 @@ module TestWrangler
 
     def complete_experiment
       selection = test_wrangler_selection
-      cookies.delete('test_wrangler')
+      cookies['test_wrangler'] = {value: nil, expires: Time.now}
       selection
     end
 

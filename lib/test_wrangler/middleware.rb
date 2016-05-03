@@ -18,15 +18,15 @@ module TestWrangler
       elsif assignment = TestWrangler.assignment_for(env)
         env['test_wrangler'] = assignment
         status, headers, body = app.call(env)
-        resp = Rack::Response.new(body, status, headers)
+        resp = ActionDispatch::Response.new(status, headers, body)
         resp.set_cookie('test_wrangler', Rack::Utils.escape(assignment.to_json))
-        resp.finish
+        resp.to_a
       else
         if tw_cookie
           status, headers, body = app.call(env)
-          resp = Rack::Response.new(body, status, headers)
+          resp = ActionDispatch::Response.new(status, headers, body)
           resp.delete_cookie('test_wrangler')
-          resp.finish
+          resp.to_a
         else
           app.call(env)
         end
