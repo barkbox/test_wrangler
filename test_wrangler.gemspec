@@ -18,7 +18,7 @@ Gem::Specification.new do |s|
   s.test_files = Dir["test/**/*"]
 
   s.add_dependency "rails"
-  s.add_dependency "redis", "~> 3.0.4"
+  s.add_dependency "redis", "~> 3.2.0"
   s.add_dependency "redis-namespace", "~> 1.5.2"
 
   s.add_development_dependency "sqlite3"

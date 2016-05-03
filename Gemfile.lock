@@ -3,7 +3,7 @@ PATH
   specs:
     test_wrangler (0.0.2)
       rails
-      redis (~> 3.0.4)
+      redis (~> 3.2.0)
       redis-namespace (~> 1.5.2)
 
 GEM
@@ -99,7 +99,7 @@ GEM
       rake (>= 0.8.7)
       thor (>= 0.18.1, < 2.0)
     rake (11.1.2)
-    redis (3.0.7)
+    redis (3.2.2)
     redis-namespace (1.5.2)
       redis (~> 3.0, >= 3.0.4)
     rspec-core (3.4.4)
