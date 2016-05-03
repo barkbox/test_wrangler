@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
   s.version     = TestWrangler::VERSION
   s.authors     = ["Erik Sälgström Peterson"]
   s.email       = ["erik@barkbox.com"]
-  s.homepage    = "TODO"
+  s.homepage    = "https://github.com/barkbox/test_wrangler"
   s.summary     = "TestWrangler is an A/B testing plugin for Rails"
   s.description = "Redis backed A/B testing platform"
   s.license     = "MIT"
