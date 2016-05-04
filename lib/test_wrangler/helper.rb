@@ -15,7 +15,7 @@ module TestWrangler
 
     def complete_experiment
       selection = test_wrangler_selection
-      cookies['test_wrangler'] = {value: nil, expires: Time.now}
+      cookies['test_wrangler'] = {value: nil, expires: Time.now - 24.hours}
       selection
     end
 
