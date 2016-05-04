@@ -232,6 +232,10 @@ module TestWrangler
     redis.smembers("experiments:#{experiment_name}:cohorts") rescue []
   end
 
+  def experiment_names
+    redis.smembers('experiments').sort rescue []
+  end
+
   def experiment_exists?(experiment_name)
     experiment_name = experiment_name.name if experiment_name.is_a? TestWrangler::Experiment
     redis.sismember('experiments', experiment_name) rescue false
