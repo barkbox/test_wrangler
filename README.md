@@ -63,12 +63,27 @@ Control variants are not automatically set, and variants will be given equal wei
 
 TODO: Add dashboard for creating and organizing cohorts.
 
+`TestWrangler::Cohort.new(name, priority, matching_criteria)`
+
 Example:
 
 ```ruby
-cohort = TestWrangler::Cohort.new('mobile', 1, {type: :user_agent, user_agent: [/Mobi/]})
+cohort = TestWrangler::Cohort.new('mobile', 1, [{type: :user_agent, user_agent: [/Mobi/]}])
 TestWrangler.save_cohort(cohort)
 ```
+`matching_criteria` should be an arry of configuration hashes for the rules a request must match to satisfy the cohort. The `type` key of the hash should have one of the following values `:user_agent`, `:query_parameters`, `:cookies`, `:universal`. The hash should also have a key that is the same as its type, with a value that is an array of values to match against. The `:universal` matcher type will match all requests, and does not need an array of matcher values.
+
+If any of a cohort's matchers' '#match?(env)' method returns true for the request env, the cohort will register a match for the request.
+
+*Matcher Types*
+
+TODO: Add method for registering new matcher types
+
+- `cookies` Accepts an array of hashes to match against the cookie. If all of the key/value pairs in any of the hashes matches the request cookies, a match is registered.
+- `user_agent` Accepts an array of strings and/or Regexp objects to match against the user agent string. A string is considered a match if it is == to the user agent string. For Regexps, the =~ operator is used. The request is considered a match if it satisfies all of the strings and Regexps in the array. For this reason, string rules only make sense if a single rule is used.
+- `query_parameters` Accepts an array of hases to match against the query parameters. If all of the key/value pairs in any of the hashes matches the request parameters, a match is registered.
+- `universal` Automatically matches any request passed to it. Any value passed as a matching rule in the config hash is discarded.
+
 
 ### Creating an Experiment
 
