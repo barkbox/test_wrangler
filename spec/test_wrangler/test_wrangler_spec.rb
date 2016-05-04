@@ -21,6 +21,27 @@ describe TestWrangler do
     end
   end
 
+  describe '::experiment_names' do
+    context 'when experiments exist' do
+      before do
+        %w(fixed_header facebook_signup copy_change).each do |name|
+          experiment = TestWrangler::Experiment.new(name, [:control, :variant])
+          TestWrangler.save_experiment(experiment)
+        end
+
+        it "returns all experiment names in alphabetical order" do
+          expect(TestWrangler.experiment_names).to eq(['copy_change', 'facebook_signup', 'fixed_header'])
+        end
+      end
+    end
+
+    context 'when no experiments exist' do
+      it "returns an empty array" do
+        expect(TestWrangler.experiment_names).to eq([])
+      end
+    end
+  end
+
   describe '::valid_request_path?(path)' do
     before do
       TestWrangler.config do |config|
