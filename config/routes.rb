@@ -1,5 +1,6 @@
 TestWrangler::Engine.routes.draw do
   namespace :api do
-    resources :experiments
+    get 'experiments' => 'experiments#index'
+    get 'experiments/:experiment_name' => 'experiments#show'
   end
 end
