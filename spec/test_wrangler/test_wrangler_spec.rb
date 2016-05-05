@@ -28,10 +28,10 @@ describe TestWrangler do
           experiment = TestWrangler::Experiment.new(name, [:control, :variant])
           TestWrangler.save_experiment(experiment)
         end
-
-        it "returns all experiment names in alphabetical order" do
-          expect(TestWrangler.experiment_names).to eq(['copy_change', 'facebook_signup', 'fixed_header'])
-        end
+      end
+      
+      it "returns all experiment names in alphabetical order" do
+        expect(TestWrangler.experiment_names).to eq(['copy_change', 'facebook_signup', 'fixed_header'])
       end
     end
 
@@ -208,6 +208,28 @@ describe TestWrangler do
 
     it 'returns false if the experiment does not exist' do
       expect(TestWrangler.experiment_json('random')).to eq(false)
+    end
+  end
+
+  describe '::cohort_names' do
+    let(:cohort1){TestWrangler::Cohort.new('facebook', 0, [{type: :query_parameters, query_parameters: {'UTM_SOURCE'=>'facebook'}}])}
+    let(:cohort2){TestWrangler::Cohort.new('mobile', 0, [{type: :user_agent, user_agent: [/Mobi/]}])}
+
+    context 'when there are persisted cohorts' do
+      before do
+        TestWrangler.save_cohort(cohort1)
+        TestWrangler.save_cohort(cohort2)
+      end
+
+      it "returns the cohort names in alphabetical order" do
+        expect(TestWrangler.cohort_names).to eq(['facebook', 'mobile'])
+      end
+    end
+
+    context 'when there are no persisted cohorts' do
+      it "returns an empty array" do
+        expect(TestWrangler.cohort_names).to eq([])
+      end
     end
   end
 

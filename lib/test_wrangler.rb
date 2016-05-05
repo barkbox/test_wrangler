@@ -8,7 +8,7 @@ require 'test_wrangler/helper'
 require 'test_wrangler/engine'
 
 module TestWrangler
-  
+  NON_VARIANT_KEY_REGEXP=/(:?participant_count)|(^state)$/
   module_function
 
   def config
@@ -226,6 +226,10 @@ module TestWrangler
     redis.smembers("cohorts:#{cohort_name}:experiments") rescue []
   end
 
+  def cohort_names
+    redis.smembers('cohorts').sort rescue []
+  end
+
   def experiment_cohorts(experiment_name)
     experiment_name = experiment_name.name if experiment_name.is_a? TestWrangler::Experiment
     return false if !experiment_exists?(experiment_name)
@@ -257,6 +261,32 @@ module TestWrangler
       redis.hmset(key, *serialized[1].to_a)
     end
     true
+  end
+
+  def experiment_json(experiment_name)
+    experiment_name = experiment_name.name if experiment_name.is_a? TestWrangler::Experiment
+    return false unless experiment_exists?(experiment_name)
+    data, cohorts = redis.multi do
+      redis.hgetall("experiments:#{experiment_name}")
+      redis.smembers("experiments:#{experiment_name}:cohorts")
+    end
+    cohorts ||= []
+    
+    variants = data.reduce([]) do |a, (k,v)|
+      unless NON_VARIANT_KEY_REGEXP =~ k.to_s
+        h = HashWithIndifferentAccess.new
+        h[k] = v.to_f
+        a << h
+      end
+      a
+    end
+
+    HashWithIndifferentAccess.new({
+      name: experiment_name,
+      variants: variants,
+      cohorts: cohorts,
+      state: data['state'] || 'inactive' 
+    })
   end
 
   def activate_experiment(experiment_name)
