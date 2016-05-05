@@ -4,14 +4,10 @@ require 'support/auth_helper'
 describe TestWrangler::ApplicationController do
   include AuthHelper
 
-  class TestWrangler::ApplicationController
+  controller do
     def index
       render nothing: true
     end
-  end
-
-  before do
-    routes.draw{ get ':controller/:action' }
   end
 
   describe 'Auth' do
