@@ -6,7 +6,7 @@ describe TestWrangler::Api::ExperimentsController do
   routes{ TestWrangler::Engine.routes }
   include AuthHelper
 
-  before do
+  before(:each) do
     TestWrangler.config do |config|
       config.username 'admin'
       config.password 'password'
@@ -25,12 +25,12 @@ describe TestWrangler::Api::ExperimentsController do
 
       it "assigns all the experiment names" do
         get :index
-        expect(assigns['experiments'].length).to eq(3)
+        expect(assigns[:@experiments].length).to eq(3)
       end
 
       it "assigns the experiment names" do
         get :index
-        expect(assigns['experiments']).to eq(['copy_change', 'facebook_signup', 'fixed_header'])
+        expect(assigns[:@experiments]).to eq(['copy_change', 'facebook_signup', 'fixed_header'])
       end
     end
 
@@ -63,7 +63,7 @@ describe TestWrangler::Api::ExperimentsController do
         before do
           cohort = TestWrangler::Cohort.new('facebook', 0, [{type: :query_parameters, query_parameters: [{'UTM_SOURCE' => 'facebook'}]}])
           TestWrangler.save_cohort(cohort)
-          TestWrangler.add_experiment_to_cohorts('facebook_signup', 'cohorts')
+          TestWrangler.add_experiment_to_cohort('facebook_signup', 'cohorts')
         end
 
         it 'assigns the cohorts' do

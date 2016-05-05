@@ -6,6 +6,7 @@ describe TestWrangler::ApplicationController do
 
   class TestWrangler::ApplicationController
     def index
+      render nothing: true
     end
   end
 
@@ -24,6 +25,7 @@ describe TestWrangler::ApplicationController do
 
       it 'allows requests with the correct credentials' do
         http_login('admin', 'password')
+        get :index
         expect(response.status).to eq(200)
       end
 

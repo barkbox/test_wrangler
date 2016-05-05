@@ -1,6 +1,14 @@
+require 'pry'
 module TestWrangler
   class ApplicationController < ActionController::Base
     protect_from_forgery with: :exception
-    http_basic_authenticate_with name: TestWrangler.config.username, password: TestWrangler.config.password
+    before_action :http_auth
+
+    def http_auth
+      creds = ActionController::HttpAuthentication::Basic.decode_credentials(request) rescue nil
+      return if creds == "#{TestWrangler.config.username}:#{TestWrangler.config.password}"
+      render nothing: true, status: :unauthorized
+    end
+
   end
 end
