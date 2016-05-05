@@ -181,6 +181,36 @@ describe TestWrangler do
     end
   end
 
+  describe '::experiment_json(experiment_name)' do
+    let(:experiment) do
+      experiment = TestWrangler::Experiment.new('facebook_signup', [:control, :signup_on_cya])
+      cohort = TestWrangler::Cohort.new('base', 10 , {type: :universal})
+      TestWrangler.save_experiment(experiment)
+      TestWrangler.activate_experiment(experiment)
+      TestWrangler.save_cohort(cohort)
+      TestWrangler.add_experiment_to_cohort(experiment, cohort)
+      10.times do
+        TestWrangler.increment_experiment_participation(experiment, TestWrangler.next_variant_for(experiment))
+      end
+      experiment
+    end
+
+    it "serializes the experiment's properties and cohort associations" do
+      expected = { 
+        name: 'facebook_signup', 
+        variants: [{control: 0.5}, {signup_on_cya: 0.5}],
+        cohorts: ['base'],
+        state: 'active'
+      }
+
+      expect(TestWrangler.experiment_json(experiment)).to eq(expected.with_indifferent_access)
+    end
+
+    it 'returns false if the experiment does not exist' do
+      expect(TestWrangler.experiment_json('random')).to eq(false)
+    end
+  end
+
   describe '::active_cohorts' do
     let(:cohort1){TestWrangler::Cohort.new('facebook', 0, [{type: :query_parameters, query_parameters: {'UTM_SOURCE'=>'facebook'}}])}
     let(:cohort2){TestWrangler::Cohort.new('mobile', 0, [{type: :user_agent, user_agent: [/Mobi/]}])}
