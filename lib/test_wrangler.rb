@@ -263,6 +263,28 @@ module TestWrangler
     true
   end
 
+  def update_experiment(experiment_name, experiment_json)
+    experiment_name = experiment_name.name if experiment_name.is_a? TestWrangler::Experiment
+    return false unless experiment_exists?(experiment_name)
+    old_json = experiment_json(experiment_name)
+    return false if old_json[:variants] != experiment_json[:variants]
+    return false if old_json[:state] != experiment_json[:state] && experiment_json[:state] != 'inactive' && experiment_json[:state] != 'active'
+    
+    if old_json[:cohorts] != experiment_json[:cohorts]
+      to_add = experiment_json[:cohorts] - old_json[:cohorts]
+      to_remove = old_json[:cohorts] - experiment_json[:cohorts]
+      to_remove.each{|c| remove_experiment_from_cohort(experiment_name, c)}
+      to_add.each{|c| add_experiment_to_cohort(experiment_name, c)}
+    end
+
+    if old_json[:state] != experiment_json[:state]
+      activate_experiment(experiment_name) if old_json[:state] == 'inactive'
+      deactivate_experiment(experiment_name) if old_json[:state] == 'active'
+    end
+
+    true
+  end
+
   def experiment_json(experiment_name)
     experiment_name = experiment_name.name if experiment_name.is_a? TestWrangler::Experiment
     return false unless experiment_exists?(experiment_name)

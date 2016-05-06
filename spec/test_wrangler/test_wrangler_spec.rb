@@ -189,9 +189,6 @@ describe TestWrangler do
       TestWrangler.activate_experiment(experiment)
       TestWrangler.save_cohort(cohort)
       TestWrangler.add_experiment_to_cohort(experiment, cohort)
-      10.times do
-        TestWrangler.increment_experiment_participation(experiment, TestWrangler.next_variant_for(experiment))
-      end
       experiment
     end
 
@@ -208,6 +205,42 @@ describe TestWrangler do
 
     it 'returns false if the experiment does not exist' do
       expect(TestWrangler.experiment_json('random')).to eq(false)
+    end
+  end
+
+  describe '::update_experiment(experiment_name, experiment_json)' do
+    context 'when the experiment exists' do
+
+      before do
+        experiment = TestWrangler::Experiment.new('facebook_signup', [:control, :signup_on_cya])
+        cohort = TestWrangler::Cohort.new('base', 10 , {type: :universal})
+        TestWrangler.save_experiment(experiment)
+        TestWrangler.save_cohort(cohort)
+        TestWrangler.add_experiment_to_cohort(experiment, cohort)
+        @json = TestWrangler.experiment_json(experiment)
+      end
+
+      it 'can update the experiment cohorts' do
+        @json[:cohorts] = []
+        expect{TestWrangler.update_experiment('facebook_signup', @json)}.to change{TestWrangler.experiment_json('facebook_signup')[:cohorts]}.to([])
+      end
+
+      it 'can update the experiment state' do
+        @json[:state] = 'active'
+        expect{TestWrangler.update_experiment('facebook_signup', @json)}.to change{TestWrangler.experiment_active?('facebook_signup')}.from(false).to(true)
+      end
+
+      it "can't update the experiment variants" do
+        @json[:variants] = []
+        expect(TestWrangler.update_experiment('facebook_signup', @json)).to eq(false)
+      end
+
+    end
+
+    context 'when the experiment does not exist' do
+      it 'returns false' do
+        expect(TestWrangler.update_experiment('random', {})).to eq(false)
+      end
     end
   end
 
