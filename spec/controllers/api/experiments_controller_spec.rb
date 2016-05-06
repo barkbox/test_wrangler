@@ -87,4 +87,62 @@ describe TestWrangler::Api::ExperimentsController do
       end
     end
   end
+
+  describe '#update' do
+    let(:experiment) do
+      experiment = TestWrangler::Experiment.new('facebook_signup', [:control, :variant])
+      TestWrangler.save_experiment(experiment)
+      experiment
+    end
+
+    let(:cohort) do
+      cohort = TestWrangler::Cohort.new('base', 10, [{type: :universal}])
+      TestWrangler.save_cohort(cohort)
+      cohort
+    end
+
+    context "when the named experiment exists" do
+      before do
+        cohort
+        experiment
+        @json = TestWrangler.experiment_json(experiment)
+      end
+
+      it "can update the experiment's status", :run do
+        @json[:state] = 'active'
+        post :update, {format: :json, experiment_name: 'facebook_signup', experiment: @json }
+        expect(response.status).to eq(200)
+        expect(TestWrangler.experiment_active?('facebook_signup')).to eq(true)
+      end
+
+      it "can add the experiment to a cohort" do
+        @json[:cohorts] << 'base'
+        post :update, { format: :json, experiment_name: 'facebook_signup', experiment: @json }
+        expect(response.status).to eq(200)
+        expect(TestWrangler.experiment_cohorts('facebook_signup')).to include('base')
+      end
+
+      it "can remove the experiment from a cohort" do
+        TestWrangler.add_experiment_to_cohort(experiment, cohort)
+        @json[:cohorts] = []
+        post :update, {format: :json, experiment_name: 'facebook_signup', experiment: @json }
+        expect(response.status).to eq(200)
+        expect(TestWrangler.experiment_cohorts('facebook_signup')).to be_empty
+      end
+
+      it "can't change the variant weights, or add variants" do
+        @json[:variants][0][:control] = 0.1
+        @json[:variants][1][:variant] = 0.9
+        expect{post :update, {format: :json, experiment_name: 'facebook_signup', experiment: @json}}.to_not change{TestWrangler.experiment_json(experiment)}
+        expect(response.status).to eq(422)
+      end
+    end
+
+    context "when the named experiment does not exist" do
+      it "responds with 404" do
+        post :update, {format: :json, experiment_name: 'random'}
+        expect(response.status).to eq(404)
+      end
+    end
+  end
 end

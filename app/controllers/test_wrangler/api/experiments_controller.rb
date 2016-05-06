@@ -13,5 +13,18 @@ class TestWrangler::Api::ExperimentsController < TestWrangler::Api::BaseControll
       render nothing: true, status: :not_found
     end
   end
+
+  def update
+    if TestWrangler.experiment_exists?(params[:experiment_name])
+      updates = params[:experiment]
+      if TestWrangler.update_experiment(params[:experiment_name], updates)
+        render json: {experiment: TestWrangler.experiment_json(params[:experiment_name])}
+      else
+        render nothing: true, status: 422
+      end
+    else
+      render nothing: true, status: :not_found
+    end
+  end
   
 end
