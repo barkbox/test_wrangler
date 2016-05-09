@@ -36,4 +36,33 @@ describe TestWrangler::Api::CohortsController do
     end
   end
 
+  describe '#show' do
+    context 'when the cohort does not exist' do
+      it 'responds with a 404' do
+        get :show, {format: :json, cohort_name: 'random'}
+        expect(response.status).to eq(404)
+      end
+    end
+    context 'when the cohort exists' do
+      before do
+        cohort = TestWrangler::Cohort.new('base', 10, [{type: :universal}])
+        TestWrangler.save_cohort(cohort)
+        experiment = TestWrangler::Experiment.new(:a_b, [:control, :a, :b])
+        TestWrangler.save_experiment(experiment)
+        TestWrangler.add_experiment_to_cohort(experiment, cohort)
+      end
+
+      it "assigns the cohort json" do
+        get :show, {format: :json, cohort_name: 'base'}
+        expect(assigns['cohort']['name']).to eq('base')
+        expect(assigns['cohort']['priority']).to eq(10)
+        expect(assigns['cohort']['criteria']).to eq([{'type' => 'universal'}])
+        expect(assigns['cohort']['experiments']).to eq(['a_b'])
+        expect(assigns['cohort']['active_experiments']).to eq([])
+        expect(response.status).to eq(200)
+      end
+
+    end
+  end
+
 end

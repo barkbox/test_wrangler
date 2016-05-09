@@ -7,5 +7,6 @@ TestWrangler::Engine.routes.draw do
     delete 'experiments/:experiment_name' => 'experiments#destroy'
 
     get 'cohorts' => 'cohorts#index'
+    get 'cohorts/:cohort_name' => 'cohorts#show'
   end
 end
