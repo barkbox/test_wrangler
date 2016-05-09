@@ -7,8 +7,7 @@ class TestWrangler::Api::ExperimentsController < TestWrangler::Api::BaseControll
 
   def show
     if (@experiment = TestWrangler.experiment_json(params[:experiment_name]))
-      @cohorts = TestWrangler.cohort_names
-      render json: { experiment: @experiment, cohorts: @cohorts }
+      render json: { experiment: @experiment }
     else
       render nothing: true, status: :not_found
     end

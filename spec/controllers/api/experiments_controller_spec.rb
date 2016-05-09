@@ -56,7 +56,6 @@ describe TestWrangler::Api::ExperimentsController do
 
       it 'assigns cohorts' do
         get :show, {format: :json, experiment_name: 'facebook_signup'}
-        expect(assigns['cohorts']).to eq([])
         expect(assigns['experiment']['cohorts']).to eq([])
       end
 
@@ -70,7 +69,6 @@ describe TestWrangler::Api::ExperimentsController do
         it 'assigns the cohorts' do
           get :show, {format: :json, experiment_name: 'facebook_signup'}
           expect(assigns['experiment']['cohorts'].first).to eq('facebook')
-          expect(assigns['cohorts'].first).to eq('facebook')
         end
       end
     end
