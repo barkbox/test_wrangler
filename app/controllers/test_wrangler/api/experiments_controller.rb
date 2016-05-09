@@ -15,13 +15,13 @@ class TestWrangler::Api::ExperimentsController < TestWrangler::Api::BaseControll
 
   def create
     experiment_name = params[:experiment][:name]
-    if TestWrangler::experiment_exists?(experiment_name)
+    if TestWrangler.experiment_exists?(experiment_name)
       render nothing: true, status: 409
     else 
       variants = params[:experiment][:variants]
       @experiment = TestWrangler::Experiment.new(experiment_name, variants) rescue false
-      if @experiment && TestWrangler::save_experiment(@experiment)
-        render json: {experiment: TestWrangler::experiment_json(@experiment)}
+      if @experiment && TestWrangler.save_experiment(@experiment)
+        render json: {experiment: TestWrangler.experiment_json(@experiment)}
       else
         render nothing: true, status: 422
       end
