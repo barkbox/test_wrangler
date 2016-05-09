@@ -23,11 +23,6 @@ describe TestWrangler::Api::ExperimentsController do
         end
       end
 
-      it "assigns all the experiment names" do
-        get :index, format: :json
-        expect(assigns["experiments"].length).to eq(3)
-      end
-
       it "assigns the experiment names" do
         get :index, format: :json
         expect(assigns["experiments"]).to eq(['copy_change', 'facebook_signup', 'fixed_header'])
