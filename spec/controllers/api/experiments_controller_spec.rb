@@ -145,4 +145,34 @@ describe TestWrangler::Api::ExperimentsController do
       end
     end
   end
+
+  describe "#create" do
+    context 'when an experiment with the indicated name already exists' do
+      before do
+        experiment = TestWrangler::Experiment.new('facebook_signup', [:control, :variant])
+        TestWrangler.save_experiment(experiment)
+      end
+
+      it "responds with 409" do
+        post :create, {format: :json, experiment: {name: 'facebook_signup'}}
+        expect(response.status).to eq(409)
+      end
+    end
+
+    context 'when the experiment name is unique' do
+      context "when the parameters are valid" do
+        it "creates a new experiment" do
+          post :create, {format: :json, experiment: {name: 'new_experiment', variants: ['control', 'variant']}}
+          expect(TestWrangler.experiment_names).to include('new_experiment')
+          expect(TestWrangler.experiment_json('new_experiment').with_indifferent_access[:variants]).to eq([{control: 0.5}.with_indifferent_access, {variant: 0.5}.with_indifferent_access])
+        end
+      end
+      context "when any parameter is invalid" do
+        it "responds with 422" do
+          post :create, {format: :json, experiment: {name: 'butt', variants: 'some variants'}}
+          expect(response.status).to eq(422)
+        end
+      end
+    end
+  end
 end
