@@ -81,12 +81,14 @@ module TestWrangler
     cohort_name = cohort_name.name if cohort_name.is_a? TestWrangler::Cohort
     return false unless cohort_exists?(cohort_name)
     key = "cohorts:#{cohort_name}"
-    priority, criteria, experiments, active_experiments = redis.multi do
+    state, priority, criteria, experiments, active_experiments = redis.multi do
+      redis.get("#{key}:state")
       redis.get("#{key}:priority")
       redis.lrange("#{key}:criteria", 0, -1)
       redis.smembers("#{key}:experiments")
       redis.lrange("#{key}:active_experiments", 0, -1)
     end
+    state ||= 'inactive'
     priority = priority.to_i
     criteria = criteria.map do |criterion|
       HashWithIndifferentAccess.new(JSON.parse(criterion))
@@ -95,6 +97,7 @@ module TestWrangler
     active_experiments ||= []
     HashWithIndifferentAccess.new(
       name: cohort_name,
+      state: state,
       priority: priority,
       criteria: criteria,
       experiments: experiments,

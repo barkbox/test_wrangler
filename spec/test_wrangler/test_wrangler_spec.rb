@@ -188,6 +188,7 @@ describe TestWrangler do
       TestWrangler.save_experiment(experiment)
       TestWrangler.activate_experiment(experiment)
       TestWrangler.save_cohort(cohort)
+      TestWrangler.activate_cohort(cohort)
       TestWrangler.add_experiment_to_cohort(experiment, cohort)
       cohort
     end
@@ -199,6 +200,7 @@ describe TestWrangler do
     it "serializes the cohort's properties and experiment associations" do
       expected = {
         name: 'base',
+        state: 'active',
         priority: 10,
         criteria: [{'type' => 'universal'}, {'type' => 'user_agent', 'user_agent' => ['(?-mix:hey)']}, {'type' => 'query_parameters', 'query_parameters' => [{'WHAT' => 'YEAH'}]}],
         experiments: ['facebook_signup'],
