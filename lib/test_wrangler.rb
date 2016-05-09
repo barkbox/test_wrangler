@@ -71,9 +71,35 @@ module TestWrangler
     redis.multi do
       redis.sadd('cohorts', serialized[0])
       redis.set("#{key}:priority", serialized[1])
-      redis.rpush("#{key}:criteria", *serialized[2])
+      redis.rpush("#{key}:criteria", serialized[2])
     end
     true
+  end
+
+
+  def cohort_json(cohort_name)
+    cohort_name = cohort_name.name if cohort_name.is_a? TestWrangler::Cohort
+    return false unless cohort_exists?(cohort_name)
+    key = "cohorts:#{cohort_name}"
+    priority, criteria, experiments, active_experiments = redis.multi do
+      redis.get("#{key}:priority")
+      redis.lrange("#{key}:criteria", 0, -1)
+      redis.smembers("#{key}:experiments")
+      redis.lrange("#{key}:active_experiments", 0, -1)
+    end
+    priority = priority.to_i
+    criteria = criteria.map do |criterion|
+      HashWithIndifferentAccess.new(JSON.parse(criterion))
+    end
+    experiments ||= []
+    active_experiments ||= []
+    HashWithIndifferentAccess.new(
+      name: cohort_name,
+      priority: priority,
+      criteria: criteria,
+      experiments: experiments,
+      active_experiments: active_experiments
+    )
   end
 
   def remove_cohort(cohort_name)

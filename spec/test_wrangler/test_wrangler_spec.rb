@@ -181,7 +181,32 @@ describe TestWrangler do
     end
   end
 
-  describe ''
+  describe '.cohort_json(cohort_name)' do
+    let(:cohort) do
+      experiment = TestWrangler::Experiment.new('facebook_signup', [:control, :signup_on_cya])
+      cohort = TestWrangler::Cohort.new('base', 10 , [{type: :universal}, {type: :user_agent, user_agent: [/hey/]},{type: :query_parameters, query_parameters: [{'WHAT' => 'YEAH'}]}])
+      TestWrangler.save_experiment(experiment)
+      TestWrangler.activate_experiment(experiment)
+      TestWrangler.save_cohort(cohort)
+      TestWrangler.add_experiment_to_cohort(experiment, cohort)
+      cohort
+    end
+
+    it 'returns false if the cohort does not exist' do
+      expect(TestWrangler.cohort_json('random')).to eq(false)
+    end
+
+    it "serializes the cohort's properties and experiment associations" do
+      expected = {
+        name: 'base',
+        priority: 10,
+        criteria: [{'type' => 'universal'}, {'type' => 'user_agent', 'user_agent' => ['(?-mix:hey)']}, {'type' => 'query_parameters', 'query_parameters' => [{'WHAT' => 'YEAH'}]}],
+        experiments: ['facebook_signup'],
+        active_experiments: ['facebook_signup']
+      }.with_indifferent_access
+      expect(TestWrangler.cohort_json(cohort)).to match(expected)
+    end
+  end
 
   describe '.experiment_json(experiment_name)' do
     let(:experiment) do
