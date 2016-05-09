@@ -175,4 +175,24 @@ describe TestWrangler::Api::ExperimentsController do
       end
     end
   end
+
+  describe '#destroy' do
+    context 'when the experiment exists' do
+      before do
+        experiment = TestWrangler::Experiment.new('facebook_signup', [:control, :variant])
+        TestWrangler.save_experiment(experiment)
+      end
+      it "destroys the experiment and responds with 200" do
+        delete :destroy, {format: :json, experiment_name: 'facebook_signup'}
+        expect(response.status).to eq(200)
+        expect(TestWrangler.experiment_exists?('facebook_signup')).to eq(false)
+      end
+    end
+    context 'when the experiment does not exist' do
+      it "responds with 404" do
+        delete :destroy, {format: :json, experiment_name: 'random'}
+        expect(response.status).to eq(404)
+      end
+    end
+  end
 end

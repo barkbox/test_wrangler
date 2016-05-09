@@ -41,5 +41,13 @@ class TestWrangler::Api::ExperimentsController < TestWrangler::Api::BaseControll
       render nothing: true, status: :not_found
     end
   end
+
+  def destroy
+    if TestWrangler.remove_experiment(params[:experiment_name])
+      render nothing: true, status: 200
+    else
+      render nothing: true, status: :not_found
+    end
+  end
   
 end
