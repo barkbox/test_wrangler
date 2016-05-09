@@ -5,5 +5,7 @@ TestWrangler::Engine.routes.draw do
     post 'experiments/:experiment_name' => 'experiments#update'
     post 'experiments' => 'experiments#create'
     delete 'experiments/:experiment_name' => 'experiments#destroy'
+
+    get 'cohorts' => 'cohorts#index'
   end
 end
