@@ -61,6 +61,38 @@ describe TestWrangler::Api::CohortsController do
         expect(assigns['cohort']['active_experiments']).to eq([])
         expect(response.status).to eq(200)
       end
+    end
+  end
+
+  describe '#update' do
+    context 'when the cohort does not exist' do
+      it 'responds with 404' do
+        post :update, {format: :json, cohort_name: 'random'}
+        expect(response.status).to eq(404)
+      end
+    end
+    context 'when the cohort exists' do
+      before do
+        cohort = TestWrangler::Cohort.new('base', 10, [{type: :universal}])
+        TestWrangler.save_cohort(cohort)
+        experiment = TestWrangler::Experiment.new(:a_b, [:control, :a, :b])
+        unused_experiment = TestWrangler::Experiment.new(:b_a, [:control])
+        TestWrangler.save_experiment(unused_experiment)
+        TestWrangler.save_experiment(experiment)
+        TestWrangler.add_experiment_to_cohort(experiment, cohort)
+        @json = TestWrangler.cohort_json(cohort)
+      end
+
+      it 'can update the state, experiments, priority, and criteria' do
+        new_json = @json.dup
+        new_json[:state] = 'active'
+        new_json[:experiments] = ['b_a']
+        new_json[:priority] = 0
+        new_json[:criteria] = [{type: "query_parameters", query_parameters: [{'hey' => 'now'}]}, {type: "user_agent", user_agent: ['(?-mix:stoowop)']}]
+        post :update, {format: :json, cohort_name: 'base', cohort: new_json}
+        new_json[:active_experiments] = []
+        expect(TestWrangler.cohort_json('base')).to eq(new_json)
+      end
 
     end
   end
