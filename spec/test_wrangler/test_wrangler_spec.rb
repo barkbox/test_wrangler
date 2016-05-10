@@ -237,6 +237,40 @@ describe TestWrangler do
     end
   end
 
+  describe '.update_cohort(cohort_name, cohort_json)' do
+    context 'when the cohort does not exist' do
+      it 'returns false' do
+        expect(TestWrangler.update_cohort('random', {})).to eq(false)
+      end
+    end
+
+    context 'when the cohort exists' do
+      before do
+        experiment = TestWrangler::Experiment.new('facebook_signup', [:control, :signup_on_cya])
+        cohort = TestWrangler::Cohort.new('base', 10 , {type: :universal})
+        TestWrangler.save_experiment(experiment)
+        unused_experiment = TestWrangler::Experiment.new(:b_a, [:control])
+        TestWrangler.save_experiment(unused_experiment)
+        TestWrangler.save_cohort(cohort)
+        TestWrangler.add_experiment_to_cohort(experiment, cohort)
+        @json = TestWrangler.cohort_json(cohort)
+      end
+
+      it 'can update the state, experiments, priority, and criteria' do
+        new_json = @json.dup
+        new_json[:state] = 'active'
+        new_json[:criteria] = [{type: :universal}, {type: :cookies, cookies: [{'what'=>'now'}]}, {type: :user_agent, user_agent: [/what/]}]
+        new_json[:experiments] = ['b_a']
+        expect{TestWrangler.update_cohort('base', new_json)}.to change{TestWrangler.cohort_json('base')}
+        json = TestWrangler.cohort_json('base')
+        expect(json[:state]).to eq('active')
+        expect(json[:criteria]).to eq([{"type"=> "universal"}.with_indifferent_access, {"type"=>"cookies", "cookies"=>[{"what"=>"now"}]}.with_indifferent_access, {"type"=>"user_agent", "user_agent"=>["(?-mix:what)"]}.with_indifferent_access])
+        expect(json[:experiments]).to eq(['b_a'])
+        expect(json[:active_experiments]).to eq([])
+      end
+    end
+  end
+
   describe '.update_experiment(experiment_name, experiment_json)' do
     context 'when the experiment exists' do
 
