@@ -314,6 +314,41 @@ module TestWrangler
     true
   end
 
+  def update_cohort(cohort_name, cohort_json)
+    cohort_name = cohort.name if cohort_name.is_a? TestWrangler::Cohort
+    return false unless cohort_exists?(cohort_name)
+    old_json = cohort_json(cohort_name)
+    return false if old_json[:active_experiments] != cohort_json[:active_experiments]
+
+
+    if old_json[:experiments] != cohort_json[:experiments]
+      to_add = cohort_json[:experiments] - old_json[:experiments]
+      to_remove = old_json[:experiments] - cohort_json[:experiments]
+      to_remove.each{|e| remove_experiment_from_cohort(e, cohort_name)}
+      to_add.each{|e| add_experiment_to_cohort(e, cohort_name)}
+    end
+
+    if old_json[:criteria] != cohort_json[:criteria]
+      cohort = TestWrangler::Cohort.new(cohort_name, cohort_json[:priority], cohort_json[:criteria])
+      criteria = cohort.serialize[2]
+      redis.multi do
+        redis.del("cohorts:#{cohort_name}:criteria")
+        redis.rpush("cohorts:#{cohort_name}:criteria", criteria)
+      end
+    end
+
+    if old_json[:priority] != cohort_json[:priority]
+      redis.set("cohorts:#{cohort_name}:priority", cohort_json[:priority])
+    end
+
+    if old_json[:state] != cohort_json[:state]
+      activate_cohort(cohort_name) if old_json[:state] == 'inactive'
+      deactivate_cohort(cohort_name) if old_json[:state] == 'active'
+    end
+
+    true
+  end
+
   def experiment_json(experiment_name)
     experiment_name = experiment_name.name if experiment_name.is_a? TestWrangler::Experiment
     return false unless experiment_exists?(experiment_name)
