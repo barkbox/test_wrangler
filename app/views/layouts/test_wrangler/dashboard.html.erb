@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>TestWrangler</title>
+  <%= stylesheet_link_tag    "test_wrangler/application", media: "all" %>
+  <%= javascript_include_tag "test_wrangler/application" %>
+  <%= csrf_meta_tags %>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <div class="logo">
+        <a href="#" data-action="experiments:index">TestWrangler</a>
+      </div>
+      <nav>
+        <ul class="nav-links">
+          <a href="#" data-action="experiments:index">Experiments</a>
+          <a href="#" data-action="cohorts:index">Cohorts</a>
+        </ul>
+      </nav>
+    </div>
+  </header>
+<main>
+  <div class="sub-nav hidden">
+    <div class="sub-nav-links">
+    </div>
+  </div>
+  <div class="content">
+  </div>
+</main>
+</body>
+</html>

@@ -2,13 +2,9 @@ require 'rails_helper'
 require 'support/auth_helper'
 
 describe TestWrangler::Dashboard::BaseController do
+  routes{ TestWrangler::Engine.routes }
   include AuthHelper
 
-  controller do
-    def index
-      render nothing: true
-    end
-  end
 
   context 'request format' do
     before do
@@ -20,12 +16,12 @@ describe TestWrangler::Dashboard::BaseController do
     end
 
     it 'allows html requests' do
-      get :index, format: :html
+      get :bootstrap, format: :html
       expect(response.status).to eq(200)
     end
 
     it 'dissallows non-html requests' do
-      get :index, format: :json
+      get :bootstrap, format: :json
       expect(response.status).to eq(406)
     end
   end

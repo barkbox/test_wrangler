@@ -12,4 +12,8 @@ TestWrangler::Engine.routes.draw do
     post 'cohorts' => 'cohorts#create'
     delete 'cohorts/:cohort_name' => 'cohorts#destroy'
   end
+
+  namespace :dashboard do
+    get '(*any)' => 'base#bootstrap'
+  end
 end
