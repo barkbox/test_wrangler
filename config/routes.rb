@@ -9,6 +9,7 @@ TestWrangler::Engine.routes.draw do
     get 'cohorts' => 'cohorts#index'
     get 'cohorts/:cohort_name' => 'cohorts#show'
     post 'cohorts/:cohort_name' => 'cohorts#update'
+    post 'cohorts' => 'cohorts#create'
     
   end
 end

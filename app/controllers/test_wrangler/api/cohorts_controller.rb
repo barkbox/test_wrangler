@@ -26,4 +26,21 @@ class TestWrangler::Api::CohortsController < TestWrangler::Api::BaseController
     end
   end
 
+  def create
+    cohort_name = params[:cohort][:name]
+    if TestWrangler.cohort_exists?(cohort_name)
+      render nothing: true, status: 409
+    else 
+      criteria = params[:cohort][:criteria]
+      priority = params[:cohort][:priority]
+      @cohort = TestWrangler::Cohort.new(cohort_name, priority, criteria) rescue false
+      saved = TestWrangler.save_cohort(@cohort) rescue false
+      if @cohort && saved
+        render json: {cohort: TestWrangler.cohort_json(@cohort)}
+      else
+        render nothing: true, status: 422
+      end
+    end
+  end
+
 end

@@ -71,6 +71,7 @@ describe TestWrangler::Api::CohortsController do
         expect(response.status).to eq(404)
       end
     end
+
     context 'when the cohort exists' do
       before do
         cohort = TestWrangler::Cohort.new('base', 10, [{type: :universal}])
@@ -94,6 +95,34 @@ describe TestWrangler::Api::CohortsController do
         expect(TestWrangler.cohort_json('base')).to eq(new_json)
       end
 
+    end
+  end
+
+  describe '#create' do
+    context 'when a cohort by the indicated name already exists' do
+      before do
+        allow(TestWrangler).to receive(:cohort_exists?).with('random'){true}
+      end
+      it 'responds with a 409' do
+        post :create, {format: :json, cohort: {name: 'random'}}
+        expect(response.status).to eq(409)
+      end
+    end
+
+    context 'when the cohort name is unique' do
+      context "when the parameters are valid" do
+        it "creates a new cohort" do
+          post :create, {format: :json, cohort: {name: 'new_cohort', priority: 0, criteria: [{type: 'universal'}, {type: 'cookies', cookies: [{'facebook' => true}]}, {type: 'user_agent', user_agent: ['(?-mix:what)']}]}}
+          expect(TestWrangler.cohort_names).to include('new_cohort')
+          expect(TestWrangler.cohort_json('new_cohort').with_indifferent_access[:criteria]).to eq([{type: 'universal'}.with_indifferent_access, {type: 'cookies', cookies: [{'facebook' => true}]}.with_indifferent_access, {type: 'user_agent', user_agent: ['(?-mix:what)']}.with_indifferent_access])
+        end
+      end
+      context "when any parameter is invalid" do
+        it "responds with 422" do
+          post :create, {format: :json, cohort: {name: 'butt', variants: 'some variants'}}
+          expect(response.status).to eq(422)
+        end
+      end
     end
   end
 
