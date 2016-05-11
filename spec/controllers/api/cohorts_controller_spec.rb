@@ -95,6 +95,12 @@ describe TestWrangler::Api::CohortsController do
         expect(TestWrangler.cohort_json('base')).to eq(new_json)
       end
 
+      it "can't update the active experiments directly" do
+        @json[:active_experiments] = ['butt']
+        post :update, {format: :json, cohort_name: 'base', cohort: @json}
+        expect(response.status).to eq(422)
+      end
+
     end
   end
 
@@ -119,7 +125,7 @@ describe TestWrangler::Api::CohortsController do
       end
       context "when any parameter is invalid" do
         it "responds with 422" do
-          post :create, {format: :json, cohort: {name: 'butt', variants: 'some variants'}}
+          post :create, {format: :json, cohort: {name: 'butt', criteria: 'some variants'}}
           expect(response.status).to eq(422)
         end
       end
