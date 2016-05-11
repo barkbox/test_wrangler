@@ -43,4 +43,11 @@ class TestWrangler::Api::CohortsController < TestWrangler::Api::BaseController
     end
   end
 
+  def destroy
+    if TestWrangler.remove_cohort(params[:cohort_name])
+      render nothing: true, status: 200
+    else
+      render nothing: true, status: 404
+    end
+  end
 end

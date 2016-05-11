@@ -126,4 +126,25 @@ describe TestWrangler::Api::CohortsController do
     end
   end
 
+  describe '#destroy' do
+    context 'when the cohort does not exist' do
+      it 'responds with a 404' do
+        delete :destroy, {format: :json, cohort_name: 'random'}
+        expect(response.status).to eq(404)
+      end
+    end
+
+    context 'when the cohort does exist' do
+      before do
+        cohort = TestWrangler::Cohort.new('base', 10, [{type: :universal}])
+        TestWrangler.save_cohort(cohort)
+      end
+
+      it 'destroys the cohort' do
+        delete :destroy, {format: :json, cohort_name: 'base'}
+        expect(response.status).to eq(200)
+        expect(TestWrangler.cohort_exists?('base')).to eq(false)
+      end
+    end
+  end
 end
