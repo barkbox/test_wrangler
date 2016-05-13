@@ -1,7 +1,7 @@
 class TestWrangler::Api::CohortsController < TestWrangler::Api::BaseController
 
   def index
-    @cohorts = TestWrangler.cohort_names
+    @cohorts = TestWrangler.cohort_names.map{|c| TestWrangler.cohort_json(c) }
     render json: {cohorts: @cohorts}
   end
 

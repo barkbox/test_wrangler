@@ -29,9 +29,9 @@ describe TestWrangler::Api::CohortsController do
         end
       end
 
-      it "assigns all the cohort names in alphabetical order" do
+      it "assigns all the cohorts in alphabetical order" do
         get :index, format: :json
-        expect(assigns['cohorts']).to eq(['base','facebook','mobile'])
+        expect(assigns['cohorts'].map{|c| c[:name]}).to eq(['base','facebook','mobile'])
       end
     end
   end
