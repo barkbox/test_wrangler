@@ -81,24 +81,21 @@ describe TestWrangler::Api::CohortsController do
         TestWrangler.save_experiment(unused_experiment)
         TestWrangler.save_experiment(experiment)
         TestWrangler.add_experiment_to_cohort(experiment, cohort)
-        @json = TestWrangler.cohort_json(cohort)
       end
 
       it 'can update the state, experiments, priority, and criteria' do
-        new_json = @json.dup
-        new_json[:state] = 'active'
-        new_json[:experiments] = ['b_a']
-        new_json[:priority] = 0
-        new_json[:criteria] = [{type: "query_parameters", query_parameters: [{'hey' => 'now'}]}, {type: "user_agent", user_agent: ['(?-mix:stoowop)']}]
-        post :update, {format: :json, cohort_name: 'base', cohort: new_json}
-        new_json[:active_experiments] = []
-        expect(TestWrangler.cohort_json('base')).to eq(new_json)
-      end
-
-      it "can't update the active experiments directly" do
-        @json[:active_experiments] = ['butt']
-        post :update, {format: :json, cohort_name: 'base', cohort: @json}
-        expect(response.status).to eq(422)
+        diff = {
+          state: 'active',
+          experiments: ['b_a'],
+          priority: 0,
+          criteria: [{type: "query_parameters", query_parameters: [{'hey' => 'now'}]}, {type: "user_agent", user_agent: ['(?-mix:stoowop)']}]
+        }
+        post :update, {format: :json, cohort_name: 'base', cohort: diff}
+        json = TestWrangler.cohort_json('base')
+        expect(json[:state]).to eq('active')
+        expect(json[:criteria]).to eq([{"type"=> "query_parameters", "query_parameters" => [{'hey'=>'now'}]}.with_indifferent_access, {type: "user_agent", user_agent: ['(?-mix:stoowop)']}.with_indifferent_access])
+        expect(json[:experiments]).to eq(['b_a'])
+        expect(json[:active_experiments]).to eq([])
       end
 
     end
