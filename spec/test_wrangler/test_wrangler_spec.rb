@@ -253,15 +253,15 @@ describe TestWrangler do
         TestWrangler.save_experiment(unused_experiment)
         TestWrangler.save_cohort(cohort)
         TestWrangler.add_experiment_to_cohort(experiment, cohort)
-        @json = TestWrangler.cohort_json(cohort)
       end
 
       it 'can update the state, experiments, priority, and criteria' do
-        new_json = @json.dup
-        new_json[:state] = 'active'
-        new_json[:criteria] = [{type: :universal}, {type: :cookies, cookies: [{'what'=>'now'}]}, {type: :user_agent, user_agent: [/what/]}]
-        new_json[:experiments] = ['b_a']
-        expect{TestWrangler.update_cohort('base', new_json)}.to change{TestWrangler.cohort_json('base')}
+        diff = {
+          state: 'active',
+          criteria: [{type: :universal}, {type: :cookies, cookies: [{'what'=>'now'}]}, {type: :user_agent, user_agent: [/what/]}],
+          experiments: ['b_a']
+        }
+        expect{TestWrangler.update_cohort('base', diff)}.to change{TestWrangler.cohort_json('base')}
         json = TestWrangler.cohort_json('base')
         expect(json[:state]).to eq('active')
         expect(json[:criteria]).to eq([{"type"=> "universal"}.with_indifferent_access, {"type"=>"cookies", "cookies"=>[{"what"=>"now"}]}.with_indifferent_access, {"type"=>"user_agent", "user_agent"=>["(?-mix:what)"]}.with_indifferent_access])
