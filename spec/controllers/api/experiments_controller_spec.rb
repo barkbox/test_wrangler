@@ -23,9 +23,10 @@ describe TestWrangler::Api::ExperimentsController do
         end
       end
 
-      it "assigns the experiment names" do
+      it "assigns the experiments" do
         get :index, format: :json
-        expect(assigns["experiments"]).to eq(['copy_change', 'facebook_signup', 'fixed_header'])
+        expect(assigns["experiments"].length).to eq(3)
+        expect(assigns["experiments"].map{|e| e[:name] }).to eq(['copy_change', 'facebook_signup', 'fixed_header'])
       end
     end
 
@@ -98,36 +99,38 @@ describe TestWrangler::Api::ExperimentsController do
       before do
         cohort
         experiment
-        @json = TestWrangler.experiment_json(experiment)
       end
 
       it "can update the experiment's status", :run do
-        @json[:state] = 'active'
-        post :update, {format: :json, experiment_name: 'facebook_signup', experiment: @json }
+        payload = {state: 'active'} 
+        post :update, {format: :json, experiment_name: 'facebook_signup', experiment: payload }
         expect(response.status).to eq(200)
         expect(TestWrangler.experiment_active?('facebook_signup')).to eq(true)
       end
 
       it "can add the experiment to a cohort" do
-        @json[:cohorts] << 'base'
-        post :update, { format: :json, experiment_name: 'facebook_signup', experiment: @json }
+        payload = {cohorts: ['base']}
+        post :update, { format: :json, experiment_name: 'facebook_signup', experiment: payload }
         expect(response.status).to eq(200)
         expect(TestWrangler.experiment_cohorts('facebook_signup')).to include('base')
       end
 
       it "can remove the experiment from a cohort" do
         TestWrangler.add_experiment_to_cohort(experiment, cohort)
-        @json[:cohorts] = []
-        post :update, {format: :json, experiment_name: 'facebook_signup', experiment: @json }
+        payload = {cohorts: []}
+        post :update, {format: :json, experiment_name: 'facebook_signup', experiment: payload }
         expect(response.status).to eq(200)
         expect(TestWrangler.experiment_cohorts('facebook_signup')).to be_empty
       end
 
       it "can't change the variant weights, or add variants" do
-        @json[:variants][0][:control] = 0.1
-        @json[:variants][1][:variant] = 0.9
-        expect{post :update, {format: :json, experiment_name: 'facebook_signup', experiment: @json}}.to_not change{TestWrangler.experiment_json(experiment)}
-        expect(response.status).to eq(422)
+        payload = {
+          variants: [
+            {control: 0.1},
+            {variant: 0.9}
+          ]
+        }
+        expect{post :update, {format: :json, experiment_name: 'facebook_signup', experiment: payload}}.to_not change{TestWrangler.experiment_json(experiment)}
       end
     end
 

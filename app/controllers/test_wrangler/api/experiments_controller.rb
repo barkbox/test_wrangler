@@ -1,7 +1,7 @@
 class TestWrangler::Api::ExperimentsController < TestWrangler::Api::BaseController
 
   def index
-    @experiments = TestWrangler.experiment_names
+    @experiments = TestWrangler.experiment_names.map{|e| TestWrangler.experiment_json(e)}
     render json: {experiments: @experiments}
   end
 
@@ -29,13 +29,8 @@ class TestWrangler::Api::ExperimentsController < TestWrangler::Api::BaseControll
   end
 
   def update
-    if TestWrangler.experiment_exists?(params[:experiment_name])
-      updates = params[:experiment]
-      if TestWrangler.update_experiment(params[:experiment_name], updates)
-        render json: {experiment: TestWrangler.experiment_json(params[:experiment_name])}
-      else
-        render nothing: true, status: 422
-      end
+    if TestWrangler.update_experiment(params[:experiment_name], update_experiment_params)
+      render json: {experiment: TestWrangler.experiment_json(params[:experiment_name])}
     else
       render nothing: true, status: :not_found
     end
@@ -48,5 +43,10 @@ class TestWrangler::Api::ExperimentsController < TestWrangler::Api::BaseControll
       render nothing: true, status: :not_found
     end
   end
+
+private
   
+  def update_experiment_params
+    params[:experiment].slice(:state, :cohorts) rescue {}
+  end
 end
