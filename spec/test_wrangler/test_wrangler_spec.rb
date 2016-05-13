@@ -280,22 +280,21 @@ describe TestWrangler do
         TestWrangler.save_experiment(experiment)
         TestWrangler.save_cohort(cohort)
         TestWrangler.add_experiment_to_cohort(experiment, cohort)
-        @json = TestWrangler.experiment_json(experiment)
       end
 
       it 'can update the experiment cohorts' do
-        @json[:cohorts] = []
-        expect{TestWrangler.update_experiment('facebook_signup', @json)}.to change{TestWrangler.experiment_json('facebook_signup')[:cohorts]}.to([])
+        diff = {cohorts: []}
+        expect{TestWrangler.update_experiment('facebook_signup', diff)}.to change{TestWrangler.experiment_json('facebook_signup')[:cohorts]}.to([])
       end
 
       it 'can update the experiment state' do
-        @json[:state] = 'active'
-        expect{TestWrangler.update_experiment('facebook_signup', @json)}.to change{TestWrangler.experiment_active?('facebook_signup')}.from(false).to(true)
+        diff = {state: 'active'}
+        expect{TestWrangler.update_experiment('facebook_signup', diff)}.to change{TestWrangler.experiment_active?('facebook_signup')}.from(false).to(true)
       end
 
       it "can't update the experiment variants" do
-        @json[:variants] = []
-        expect(TestWrangler.update_experiment('facebook_signup', @json)).to eq(false)
+        diff = {variants: []}
+        expect{TestWrangler.update_experiment('facebook_signup', diff)}.to_not change{TestWrangler.experiment_json('facebook_signup')}
       end
 
     end
@@ -681,6 +680,37 @@ describe TestWrangler do
       TestWrangler.activate_experiment(experiment)
       expect{TestWrangler.deactivate_experiment(experiment)}.to change{TestWrangler.active_cohort_experiments(cohort)}
     end
+  end
+
+  describe '.experiment_state(experiment_name)' do
+    before do
+      experiment = TestWrangler::Experiment.new('facebook_signup', [:signup_on_cya])
+      TestWrangler.save_experiment(experiment)
+      TestWrangler.activate_experiment(experiment)
+    end
+
+    context 'when the experiment exists and its state key is set to "active"' do
+      it "returns active" do
+        expect(TestWrangler.experiment_state('facebook_signup')).to eq('active')
+      end
+    end
+    context 'when the experiment does not exist' do
+      it "returns nil" do
+        expect(TestWrangler.experiment_state('random')).to eq(nil)
+      end
+    end
+
+    context 'when its state key is not set to "active"' do
+      before do
+        TestWrangler.deactivate_experiment('facebook_signup')
+      end
+
+      it "returns false" do
+        expect(TestWrangler.experiment_active?('facebook_signup')).to eq(false)
+        expect(TestWrangler.experiment_active?('random')).to eq(false)
+      end
+    end
+      
   end
 
   describe '.experiment_active?(experiment_name)' do
