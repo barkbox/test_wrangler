@@ -2,31 +2,23 @@
 <html>
 <head>
   <title>TestWrangler</title>
-  <%= stylesheet_link_tag    "test_wrangler/application", media: "all" %>
-  <%= javascript_include_tag "test_wrangler/application" %>
+  <%= stylesheet_link_tag    "test_wrangler/test_wrangler", media: "all" %>
+  <%= javascript_include_tag "test_wrangler/test_wrangler" %>
   <%= csrf_meta_tags %>
 </head>
 <body>
   <header>
     <div class="header-inner">
       <div class="logo">
-        <a href="#" data-action="experiments:index">TestWrangler</a>
+        <a href="/test_wrangler/dashboard/experiments">TestWrangler</a>
       </div>
       <nav>
         <ul class="nav-links">
-          <a href="#" data-action="experiments:index">Experiments</a>
-          <a href="#" data-action="cohorts:index">Cohorts</a>
+          <a href="/test_wrangler/dashboard/experiments">Experiments</a>
+          <a href="/test_wrangler/dashboard/cohorts">Cohorts</a>
         </ul>
       </nav>
     </div>
   </header>
-<main>
-  <div class="sub-nav hidden">
-    <div class="sub-nav-links">
-    </div>
-  </div>
-  <div class="content">
-  </div>
-</main>
 </body>
 </html>
