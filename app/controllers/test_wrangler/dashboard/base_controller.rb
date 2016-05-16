@@ -1,5 +1,5 @@
 class TestWrangler::Dashboard::BaseController < TestWrangler::ApplicationController
-  before_action :ensure_html_request
+  before_filter :ensure_html_request
   layout 'test_wrangler/dashboard'
 
   def bootstrap
