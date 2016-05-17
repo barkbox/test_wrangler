@@ -1,0 +1,44 @@
+<div class="page-header">
+  <h2>Experiment - {{= it.name }} 
+    <button class="btn delete">Delete</button> 
+    {{? it.state == 'active' }} 
+      <button class="btn deactivate">Deactivate</button> 
+    {{??}} 
+      <button class="btn activate">Activate</button>
+    {{?}}
+  </h2> 
+</div>
+<section class="form experiment">
+  <div class="field-group">
+    <span class="label">Variants</span>
+    <table>
+      <thead>
+        <tr>
+          <td>Name</td>
+          <td>Weight</td>
+        </tr>
+      </thead>
+      <tbody>
+      {{~ it.variants :variant }}
+        <tr><td>{{= Object.keys(variant)[0] }}</td><td>{{= (variant[Object.keys(variant)[0]] * 100) + "%" }}</tr>
+      {{~}}
+      </tbody>
+    <table>
+  </div>
+  <div class="field-group cohorts">
+    <span class="label">Current Cohorts</span>
+    {{~ it.cohorts :value }}
+      <label data-cohort-name="{{= value}}">
+      {{= value}} <button class="btn toggle-cohort"></button>
+      </label>
+    {{~}}
+  </div>
+  <div class="field-group other-cohorts">
+    <span class="label">Available Cohorts</span>
+    {{~ it.otherCohorts :value }}
+      <label data-cohort-name="{{= value}}">
+      {{= value}} <button class="btn toggle-cohort"></button>
+      </label>
+    {{~}}
+  </fieldgroup>
+</section>

@@ -1,0 +1,11 @@
+<div class="page-header">
+  <h2>Experiment - {{= it.name }} 
+    <button class="btn delete">Delete</button> 
+    {{= it.state }}
+    {{? it.state == 'active' }} 
+      <button class="btn deactivate">Deactivate</button> 
+    {{??}} 
+      <button class="btn activate">Activate</button>
+    {{?}}
+  </h2> 
+</div>
