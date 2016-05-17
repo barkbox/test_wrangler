@@ -2,11 +2,7 @@ var ExperimentView = TestWranglerView.extend({
     tagName: 'main',
     className: 'experiment show',
     events: {
-        "click button.delete": function(){
-            this.model.destroy({success: function(){
-                ExperimentsRouter.navigate('index', true);
-            }});
-        },
+        "click button.delete": "destroyModel",
         "click .other-cohorts button.toggle-cohort": "addCohort",
         "click .cohorts button.toggle-cohort": "removeCohort",
         "click button.activate": "activateExperiment",
@@ -50,5 +46,10 @@ var ExperimentView = TestWranglerView.extend({
     },
     deactivateExperiment: function(){
         this.model.save({state: 'inactive'})
+    },
+    destroyModel: function(){
+        this.model.destroy({success: function(){
+            Backbone.history.navigate('experiments', true);
+        }});
     }
 });

@@ -18,5 +18,6 @@
 //= require ./apps/experiments/model.js
 //= require ./apps/experiments/collection.js
 //= require ./apps/experiments/views/show.js
+//= require ./apps/experiments/views/index.js
 //= require ./apps/experiments/router.js
 //= require ./app.js
