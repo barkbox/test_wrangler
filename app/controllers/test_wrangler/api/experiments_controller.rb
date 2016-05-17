@@ -47,6 +47,8 @@ class TestWrangler::Api::ExperimentsController < TestWrangler::Api::BaseControll
 private
   
   def update_experiment_params
-    params[:experiment].slice(:state, :cohorts) rescue {}
+    slice = params[:experiment].slice(:state, :cohorts) rescue {}
+    slice[:cohorts] = [] if slice.has_key?(:cohorts) && slice[:cohorts].nil?
+    slice
   end
 end
