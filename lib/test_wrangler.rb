@@ -365,12 +365,11 @@ module TestWrangler
       end
       a
     end
-
     HashWithIndifferentAccess.new({
       name: experiment_name,
       variants: variants,
       cohorts: cohorts,
-      state: data['state'] || 'inactive' 
+      state: data['state'].blank? ? 'inactive' : data['state']
     })
   end
 
