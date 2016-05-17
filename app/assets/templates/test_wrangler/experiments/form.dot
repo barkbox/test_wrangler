@@ -1,0 +1,42 @@
+<div class="page-header">
+  <h2>Experiment {{? it.name}}- {{= it.name}}{{?}}
+</div>
+<section class="form experiment">
+  <div class="field-group">
+  <span class="label">Name</span>
+   <input class="experiment-name" value="{{= it.name ||""}}">
+  </div>
+  <div class="field-group">
+    <span class="label">Variants</span>
+  </div>
+  <div class="field-group">
+    <table>
+      <thead>
+        <tr>
+          <td>Variant Name</td>
+          <td>Variant Weight</td>
+          <td></td>
+        </tr>
+      </thead>
+      <tbody>
+      {{~ it.variants :variant:index }}
+        <tr>
+        <td>
+          <input data-index="{{= index}}" class="variant-name" value="{{= Object.keys(variant)[0] }}" type="text">
+        </td>
+        <td>
+          <input data-index="{{= index}}" class="variant-weight" type="text" value="{{= (variant[Object.keys(variant)[0]] * 100) }}">%
+        </td>
+        <td>
+          <button class="remove-variant btn remove" data-index="{{= index}}"></button>
+        </td>
+        </tr>
+      {{~}}
+      </tbody>
+    </table>
+    <input class="new-variant-name" placeholder="Name"><input class="new-variant-weight" placeholder="Weight (%)"><button class="btn green add-variant">Add Variant +</button>
+  </div>
+  <div class="field-group">
+    <button class="save btn green">Save</button>
+  </div>
+</section>

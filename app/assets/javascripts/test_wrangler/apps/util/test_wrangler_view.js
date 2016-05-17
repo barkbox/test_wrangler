@@ -2,10 +2,10 @@ var TestWranglerView = Backbone.View.extend({
     initialize: function(){
         var self = this;
         this.promise = this.setTemplates()
+                        .then(this.ready.bind(this))
                         .then(function(){
-                            self.listenToOnce(Backbone.history, 'route', self.remove.bind(self));
-                        })
-                        .then(this.ready.bind(this));
+                            self.listenToOnce(Backbone.history, 'beforePageChange', self.remove.bind(self));
+                        });
     },
     setTemplates: function(){
         var self = this;

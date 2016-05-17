@@ -1,10 +1,10 @@
 <div class="page-header">
   <h2>Experiment - {{= it.name }} 
-    <button class="btn delete">Delete</button> 
+    <button class="btn delete red">Delete</button> 
     {{? it.state == 'active' }} 
-      <button class="btn deactivate">Deactivate</button> 
+      <button class="btn deactivate gray">Deactivate</button> 
     {{??}} 
-      <button class="btn activate">Activate</button>
+      <button class="btn activate green">Activate</button>
     {{?}}
   </h2> 
 </div>
@@ -20,7 +20,7 @@
       </thead>
       <tbody>
       {{~ it.variants :variant }}
-        <tr><td>{{= Object.keys(variant)[0] }}</td><td>{{= (variant[Object.keys(variant)[0]] * 100) + "%" }}</tr>
+        <tr><td>{{= Object.keys(variant)[0] }}</td><td>{{= (variant[Object.keys(variant)[0]] * 100) + "%" }}</td></tr>
       {{~}}
       </tbody>
     <table>
@@ -29,7 +29,7 @@
     <span class="label">Current Cohorts</span>
     {{~ it.cohorts :value }}
       <label data-cohort-name="{{= value}}">
-      {{= value}} <button class="btn toggle-cohort"></button>
+      {{= value}} <button class="btn toggle-cohort remove"></button>
       </label>
     {{~}}
   </div>
@@ -37,7 +37,7 @@
     <span class="label">Available Cohorts</span>
     {{~ it.otherCohorts :value }}
       <label data-cohort-name="{{= value}}">
-      {{= value}} <button class="btn toggle-cohort"></button>
+      {{= value}} <button class="btn toggle-cohort add"></button>
       </label>
     {{~}}
   </fieldgroup>

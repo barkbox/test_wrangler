@@ -14,11 +14,11 @@ class TestWrangler::Api::ExperimentsController < TestWrangler::Api::BaseControll
   end
 
   def create
-    experiment_name = params[:experiment][:name]
+    experiment_name = create_experiment_params[:name]
     if TestWrangler.experiment_exists?(experiment_name)
       render nothing: true, status: 409
     else 
-      variants = params[:experiment][:variants]
+      variants = create_experiment_params[:variants]
       @experiment = TestWrangler::Experiment.new(experiment_name, variants) rescue false
       if @experiment && TestWrangler.save_experiment(@experiment)
         render json: {experiment: TestWrangler.experiment_json(@experiment)}
@@ -51,4 +51,11 @@ private
     slice[:cohorts] = [] if slice.has_key?(:cohorts) && slice[:cohorts].nil?
     slice
   end
+
+  def create_experiment_params
+    slice = params[:experiment].slice(:name, :variants) rescue {}
+    slice[:variant] = [] if slice.has_key?(:variant) && slice[:variant].nil?
+    slice
+  end
+
 end

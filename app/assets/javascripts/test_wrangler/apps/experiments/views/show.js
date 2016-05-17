@@ -27,7 +27,7 @@ var ExperimentView = TestWranglerView.extend({
     },
     addCohort: function(e){
         var cohortName = $(e.target).parent('label').data('cohortName');
-        var cohorts = this.model.get('cohorts');
+        var cohorts = _.clone(this.model.get('cohorts'));
 
         cohorts.push(cohortName);
         this.unusedCohorts.splice(this.unusedCohorts.indexOf(cohortName), 1);
@@ -35,7 +35,7 @@ var ExperimentView = TestWranglerView.extend({
     },
     removeCohort: function(e){
         var cohortName = $(e.target).parent('label').data('cohortName');
-        var cohorts = this.model.get('cohorts');
+        var cohorts = _.clone(this.model.get('cohorts'));
         
         cohorts.splice(cohorts.indexOf(cohortName), 1);
         this.unusedCohorts.push(cohortName);

@@ -1,5 +1,6 @@
 <div class="page-header">
-  <h2>Experiments</h2> 
+  <h2>Experiments</h2>
+  <a href="/test_wrangler/dashboard/experiments/new">New Experiment</a> 
 </div>
 <section class="form">
 <table>

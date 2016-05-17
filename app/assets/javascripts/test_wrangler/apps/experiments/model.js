@@ -1,4 +1,4 @@
-var Experiment = Backbone.Model.extend({
+var Experiment = TestWranglerModel.extend({
     idAttribute: 'name',
     urlRoot: '/test_wrangler/api/experiments',
     defaults: {
@@ -25,6 +25,10 @@ var Experiment = Backbone.Model.extend({
         errors.push(new Error("experiment cohorts must be an array of cohort names"));
     },
     toJSON: function(options){
-        return {experiment: {cohorts: this.attributes.cohorts, state: this.attributes.state}};
+        if(this.isNew){
+            return {experiment: {name: this.id, variants: this.attributes.variants}};
+        } else {
+            return {experiment: {cohorts: this.attributes.cohorts, state: this.attributes.state}};
+        }
     }
 });
