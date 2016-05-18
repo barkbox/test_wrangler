@@ -5,11 +5,11 @@ var CohortsRouter = Backbone.Router.extend({
         "cohorts/:name(/)": "show"
     },
     new: function(){
-        var cohort = new Cohort();
+        var cohort = new Cohort({newRecord: true});
         var view = new NewCohortView({model: cohort});
     },
     show: function(name){
-        var cohort = new Cohort({name: name});
+        var cohort = new Cohort({name: name, isNew: false});
         cohort.fetch({
             success: function(){
                 var view = new CohortView({

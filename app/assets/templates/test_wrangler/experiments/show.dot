@@ -40,5 +40,5 @@
       {{= value}} <button class="btn toggle-cohort add"></button>
       </label>
     {{~}}
-  </fieldgroup>
+  </div>
 </section>

@@ -12,7 +12,7 @@ var Cohort = TestWranglerModel.extend({
     validate: function(attrs){
         var errors = [];
         this.validateState(attrs.state, errors);
-        this.validateCohorts(attrs.cohorts, errors);
+        this.validateExperiments(attrs.experiments, errors);
 
         return errors.length > 0 ? errors : undefined;
     },
@@ -20,15 +20,15 @@ var Cohort = TestWranglerModel.extend({
         if(state === 'active' || state === 'inactive') return;
         errors.push(new Error("cohort state must be 'active' or 'inactive'"));
     },
-    validateCohorts: function(cohorts, errors){
-        if(_.isArray(cohorts)) return;
-        errors.push(new Error("cohort cohorts must be an array of cohort names"));
+    validateExperiments: function(experiments, errors){
+        if(_.isArray(experiments)) return;
+        errors.push(new Error("cohort experiments must be an array of experiment names"));
     },
     toJSON: function(options){
-        if(this.isNew){
-            return {cohort: {name: this.id, variants: this.attributes.variants}};
+        if(this.attributes.newRecord){
+            return {cohort: {name: this.id, priority: this.attributes.priority, criteria: this.attributes.variants}};
         } else {
-            return {cohort: {cohorts: this.attributes.cohorts, state: this.attributes.state}};
+            return {cohort: {experiments: this.attributes.experiments, state: this.attributes.state, priority: this.attributes.priority }};
         }
     }
 });

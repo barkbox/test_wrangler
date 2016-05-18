@@ -5,7 +5,7 @@ var ExperimentsRouter = Backbone.Router.extend({
         "experiments/:name(/)": "show"
     },
     new: function(){
-        var experiment = new Experiment();
+        var experiment = new Experiment({newRecord: true});
         var view = new NewExperimentView({model: experiment});
     },
     show: function(name){

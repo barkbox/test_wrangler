@@ -25,7 +25,7 @@ var Experiment = TestWranglerModel.extend({
         errors.push(new Error("experiment cohorts must be an array of cohort names"));
     },
     toJSON: function(options){
-        if(this.isNew){
+        if(this.attributes.newRecord){
             return {experiment: {name: this.id, variants: this.attributes.variants}};
         } else {
             return {experiment: {cohorts: this.attributes.cohorts, state: this.attributes.state}};

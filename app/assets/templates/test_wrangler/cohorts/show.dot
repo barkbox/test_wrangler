@@ -1,0 +1,49 @@
+<div class="page-header">
+  <h2>Cohort - {{= it.name }} 
+    <button class="btn delete red">Delete</button> 
+    {{? it.state == 'active' }} 
+      <button class="btn deactivate gray">Deactivate</button> 
+    {{??}} 
+      <button class="btn activate green">Activate</button>
+    {{?}}
+  </h2> 
+</div>
+<section class="form cohort">
+  <div class="field-group">
+  <span class="label">Priority (lower numbers come first)</span>
+  <input class="cohort-priority" type="number" value="{{= it.priority}}">
+  <button class="set-priority btn green">Set</button>
+  </div>
+  <div class="field-group">
+    <span class="label">Criteria</span>
+    <table>
+      <thead>
+        <tr>
+          <td>Type</td>
+          <td>Rules</td>
+        </tr>
+      </thead>
+      <tbody>
+      {{~ it.criteria :criterion }}
+        <tr><td>{{= criterion.type }}</td><td>{{= JSON.stringify(criterion[criterion.type] || []) }}</td></tr>
+      {{~}}
+      </tbody>
+    <table>
+  </div>
+  <div class="field-group experiments">
+    <span class="label">Current Experiments</span>
+    {{~ it.experiments :value }}
+      <label data-experiment-name="{{= value}}">
+      {{= value}} <button class="btn toggle-experiment remove"></button>
+      </label>
+    {{~}}
+  </div>
+  <div class="field-group other-experiments">
+    <span class="label">Available Experiments</span>
+    {{~ it.otherExperiments :value }}
+      <label data-experiment-name="{{= value}}">
+      {{= value}} <button class="btn toggle-experiment add"></button>
+      </label>
+    {{~}}
+  </div>
+</section>
