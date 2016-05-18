@@ -1,0 +1,22 @@
+<div class="page-header">
+  <h2>Cohorts</h2>
+  <a href="/test_wrangler/dashboard/cohorts/new">New Cohort</a> 
+</div>
+<section class="form">
+<table>
+  <thead>
+    <tr>
+      <td>Name</td>
+      <td>State</td>
+      <td>Cohorts</td>
+    </tr>
+  </thead>
+  <tbody>
+  {{~ it :cohort}}
+    <tr>
+      <td><a href="/test_wrangler/dashboard/cohorts/{{= cohort.id}}">{{= cohort.id }}</a></td><td>{{= cohort.attributes.state }}</td><td>{{= cohort.attributes.experiments.join(', ')}}
+    </tr>
+  {{~}}
+  </tbody>
+</table>
+</section>

@@ -1,5 +1,6 @@
 $(function(){
-    new ExperimentsRouter()
+    new ExperimentsRouter();
+    new CohortsRouter();
     Backbone.history.start({pushState: true, root: "/test_wrangler/dashboard/"});
     var bbRoot = Backbone.history.root.replace(/^\//, '').replace(/\/$/, '');
     var bbRootRegexp = new RegExp(bbRoot);

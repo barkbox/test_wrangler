@@ -1,13 +1,13 @@
-var ExperimentsView = TestWranglerView.extend({
+var CohortsView = TestWranglerView.extend({
     tagName: 'main',
-    className: 'experiment index',
-    templates: {index: 'experiments/index'},
+    className: 'cohort index',
+    templates: {index: 'cohorts/index'},
     ready: function(){
-        this.render();
+        return this.render();
     },
     render: function(){
         this.$el.html(this.templates['index'](this.collection.models));
         $('body').append(this.$el);
         return this;
     }
-})
+});

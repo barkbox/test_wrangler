@@ -21,4 +21,8 @@
 //= require ./apps/experiments/views/new.js
 //= require ./apps/experiments/views/index.js
 //= require ./apps/experiments/router.js
+//= require ./apps/cohorts/model.js
+//= require ./apps/cohorts/collection.js
+//= require ./apps/cohorts/views/index.js
+//= require ./apps/cohorts/router.js
 //= require ./app.js
