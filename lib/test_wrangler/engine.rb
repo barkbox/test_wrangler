@@ -7,6 +7,9 @@ module TestWrangler
       ActionController::Base.send :include, TestWrangler::Helper
       ActionController::Base.helper TestWrangler::Helper
       ActionController::Base.helper_method :test_wrangler_selection, :complete_experiment
+
+      app.config.assets.precompile += %w(test_wrangler.js test_wrangler.css)
     end
+    
   end
 end

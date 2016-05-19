@@ -8,7 +8,7 @@ require 'test_wrangler/helper'
 require 'test_wrangler/engine'
 
 module TestWrangler
-  
+  NON_VARIANT_KEY_REGEXP=/(:?participant_count)|(^state)$/
   module_function
 
   def config
@@ -71,9 +71,38 @@ module TestWrangler
     redis.multi do
       redis.sadd('cohorts', serialized[0])
       redis.set("#{key}:priority", serialized[1])
-      redis.rpush("#{key}:criteria", *serialized[2])
+      redis.rpush("#{key}:criteria", serialized[2])
     end
     true
+  end
+
+
+  def cohort_json(cohort_name)
+    cohort_name = cohort_name.name if cohort_name.is_a? TestWrangler::Cohort
+    return false unless cohort_exists?(cohort_name)
+    key = "cohorts:#{cohort_name}"
+    state, priority, criteria, experiments, active_experiments = redis.multi do
+      redis.get("#{key}:state")
+      redis.get("#{key}:priority")
+      redis.lrange("#{key}:criteria", 0, -1)
+      redis.smembers("#{key}:experiments")
+      redis.lrange("#{key}:active_experiments", 0, -1)
+    end
+    state ||= 'inactive'
+    priority = priority.to_i
+    criteria = criteria.map do |criterion|
+      HashWithIndifferentAccess.new(JSON.parse(criterion))
+    end
+    experiments ||= []
+    active_experiments ||= []
+    HashWithIndifferentAccess.new(
+      name: cohort_name,
+      state: state,
+      priority: priority,
+      criteria: criteria,
+      experiments: experiments,
+      active_experiments: active_experiments
+    )
   end
 
   def remove_cohort(cohort_name)
@@ -226,10 +255,18 @@ module TestWrangler
     redis.smembers("cohorts:#{cohort_name}:experiments") rescue []
   end
 
+  def cohort_names
+    redis.smembers('cohorts').sort rescue []
+  end
+
   def experiment_cohorts(experiment_name)
     experiment_name = experiment_name.name if experiment_name.is_a? TestWrangler::Experiment
     return false if !experiment_exists?(experiment_name)
     redis.smembers("experiments:#{experiment_name}:cohorts") rescue []
+  end
+
+  def experiment_names
+    redis.smembers('experiments').sort rescue []
   end
 
   def experiment_exists?(experiment_name)
@@ -237,11 +274,14 @@ module TestWrangler
     redis.sismember('experiments', experiment_name) rescue false
   end
 
-  def experiment_active?(experiment_name)
+  def experiment_state(experiment_name)
     experiment_name = experiment_name.name if experiment_name.is_a? TestWrangler::Experiment
     key = "experiments:#{experiment_name}"
     state = redis.hget(key, 'state') rescue nil
-    state == 'active'
+  end
+
+  def experiment_active?(experiment_name)
+    experiment_state(experiment_name) == 'active'
   end
 
   def save_experiment(experiment)
@@ -253,6 +293,84 @@ module TestWrangler
       redis.hmset(key, *serialized[1].to_a)
     end
     true
+  end
+
+  def update_experiment(experiment_name, experiment_json)
+    experiment_name = experiment_name.name if experiment_name.is_a? TestWrangler::Experiment
+    return false unless experiment_exists?(experiment_name)
+    
+    if experiment_json[:cohorts]
+      old_cohorts = experiment_cohorts(experiment_name)
+      to_add = experiment_json[:cohorts] - old_cohorts
+      to_remove = old_cohorts - experiment_json[:cohorts]
+      to_remove.each{|c| remove_experiment_from_cohort(experiment_name, c)}
+      to_add.each{|c| add_experiment_to_cohort(experiment_name, c)}
+    end
+
+    if experiment_json[:state]
+      activate_experiment(experiment_name) if experiment_json[:state] == 'active'
+      deactivate_experiment(experiment_name) if experiment_json[:state] == 'inactive'
+    end
+
+    true
+  end
+
+  def update_cohort(cohort_name, cohort_json)
+    cohort_name = cohort.name if cohort_name.is_a? TestWrangler::Cohort
+    return false unless cohort_exists?(cohort_name)
+    
+    current_experiments = cohort_experiments(cohort_name)
+    if cohort_json[:experiments] 
+      to_add = cohort_json[:experiments] - current_experiments
+      to_remove = current_experiments - cohort_json[:experiments]
+      to_remove.each{|e| remove_experiment_from_cohort(e, cohort_name)}
+      to_add.each{|e| add_experiment_to_cohort(e, cohort_name)}
+    end
+
+    if cohort_json[:criteria]
+      cohort = TestWrangler::Cohort.new(cohort_name, cohort_json[:priority], cohort_json[:criteria])
+      criteria = cohort.serialize[2]
+      redis.multi do
+        redis.del("cohorts:#{cohort_name}:criteria")
+        redis.rpush("cohorts:#{cohort_name}:criteria", criteria)
+      end
+    end
+
+    if cohort_json[:priority]
+      redis.set("cohorts:#{cohort_name}:priority", cohort_json[:priority])
+    end
+
+    if cohort_json[:state]
+      activate_cohort(cohort_name) if cohort_json[:state] == 'active'
+      deactivate_cohort(cohort_name) if cohort_json[:state] == 'inactive'
+    end
+
+    true
+  end
+
+  def experiment_json(experiment_name)
+    experiment_name = experiment_name.name if experiment_name.is_a? TestWrangler::Experiment
+    return false unless experiment_exists?(experiment_name)
+    data, cohorts = redis.multi do
+      redis.hgetall("experiments:#{experiment_name}")
+      redis.smembers("experiments:#{experiment_name}:cohorts")
+    end
+    cohorts ||= []
+    
+    variants = data.reduce([]) do |a, (k,v)|
+      unless NON_VARIANT_KEY_REGEXP =~ k.to_s
+        h = HashWithIndifferentAccess.new
+        h[k] = v.to_f
+        a << h
+      end
+      a
+    end
+    HashWithIndifferentAccess.new({
+      name: experiment_name,
+      variants: variants,
+      cohorts: cohorts,
+      state: data['state'].blank? ? 'inactive' : data['state']
+    })
   end
 
   def activate_experiment(experiment_name)

@@ -67,4 +67,63 @@ describe TestWrangler::Config do
     end  
   end
 
+  describe '#username(username=nil)' do
+    before do      
+        ENV.delete('TEST_WRANGLER_USER')
+    end
+
+    context 'with an argument' do
+      it 'sets the username' do
+        expect{config.username('admin')}.to change{config.username}.from(nil).to('admin')
+      end
+    end
+
+    context 'without an argument' do
+      context 'if ENV["TEST_WRANGLER_USER"] is set' do
+        before do
+          ENV["TEST_WRANGLER_USER"] = 'someuser'
+        end
+
+        it 'defaults to the env value' do
+          expect(config.username).to eq('someuser')
+        end
+      end
+      context 'if no user is set in the ENV' do
+        it 'defaults to nil' do
+          expect(config.username).to be_nil
+        end
+      end
+    end
+  end
+
+  describe '#password(password=nil)' do
+    before do      
+      ENV.delete('TEST_WRANGLER_PASSWORD')
+    end
+
+    context 'with an argument' do
+      it 'sets the password' do
+        expect{config.password('admin')}.to change{config.password}.from(nil).to('admin')
+      end
+    end
+
+    context 'without an argument' do
+      context 'if ENV["TEST_WRANGLER_USER"] is set' do
+        before do
+          ENV["TEST_WRANGLER_PASSWORD"] = 'someuser'
+        end
+
+        it 'defaults to the env value' do
+          expect(config.password).to eq('someuser')
+        end
+      end
+
+      context 'if no user is set in the ENV' do
+        it 'defaults to nil' do
+          expect(config.password).to be_nil
+        end
+      end
+    end
+  end
+
 end

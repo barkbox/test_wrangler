@@ -25,5 +25,21 @@ module TestWrangler
       end
     end
 
+    def username(username=nil)
+      if username.nil?
+        @username ||= ENV['TEST_WRANGLER_USER']
+      else
+        @username = username
+      end
+    end
+
+    def password(password=nil)
+      if password.nil?
+        @password ||= ENV['TEST_WRANGLER_PASSWORD']
+      else
+        @password = password
+      end
+    end
+
   end
 end

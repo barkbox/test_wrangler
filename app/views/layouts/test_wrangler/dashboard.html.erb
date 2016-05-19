@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>TestWrangler</title>
+  <%= stylesheet_link_tag    "test_wrangler/test_wrangler", media: "all" %>
+  <%= javascript_include_tag "test_wrangler/test_wrangler" %>
+  <%= csrf_meta_tags %>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <div class="logo">
+        <a href="/test_wrangler/dashboard/experiments">TestWrangler</a>
+      </div>
+      <nav>
+        <ul class="nav-links">
+          <a href="/test_wrangler/dashboard/experiments">Experiments</a>
+          <a href="/test_wrangler/dashboard/cohorts">Cohorts</a>
+        </ul>
+      </nav>
+    </div>
+  </header>
+</body>
+</html>
