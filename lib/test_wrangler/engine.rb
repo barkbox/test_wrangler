@@ -17,7 +17,7 @@ module TestWrangler
     end
 
     initializer "test_wrangler.static" do |app|
-      app.middleware.insert_before(::ActionDispatch::Static, ::ActionDispatch::Static, "#{root}/public")
+      app.middleware.use(::ActionDispatch::Static, "#{root}/public")
     end
   end
 end
