@@ -13,8 +13,7 @@ module TestWrangler
     end
 
     initializer "test_wrangler.precompile", group: :all do |app|
-      # app.config.assets.paths << root.join("app","assets","stylesheets", "test_wrangler")
-      # app.config.assets.paths << root.join("app","assets","javascripts", "test_wrangler")
+      app.config.assets.paths << root.join("app","assets","templates")
       app.config.assets.precompile += ["test_wrangler/test_wrangler.js", "test_wrangler/test_wrangler.css"]
     end
   end
