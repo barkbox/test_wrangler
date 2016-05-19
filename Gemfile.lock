@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    test_wrangler (0.1.0)
+    test_wrangler (0.2.0.rc1)
       jquery-rails
       rails
       redis (~> 3.2.0)
