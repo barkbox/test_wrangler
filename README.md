@@ -4,6 +4,8 @@ TestWrangler is an a/b testing platform for Rails, leveraging Rack middleware an
 
 TestWrangler is designed to integrate with a third party front or back end user tracking service like Mixpanel for metrics and conversion tracking.
 
+TestWrangler also provides a basic CMS for managing its data.
+
 ## Installation
 
 Add this line to your application's Gemfile:
@@ -22,7 +24,7 @@ Or install it yourself as:
 
 ## Usage
 
-Once TestWrangler is installed, it will inject its middleware and its helper into your application. The middleware is designed to operate independently of any other part of the Rails middleware stack, so that its order in the stack does not matter. TestWrangler will run and attempt to assign test selections to requests as long as the `TEST_WRANGLER` environment variable is set to `'on'`.
+Once TestWrangler is installed, it will inject its middleware and its helper into your application. The middleware is designed to operate independently of any other part of the Rails middleware stack, such that its order in the stack does not matter. TestWrangler will run and attempt to assign test selections to requests as long as the `TEST_WRANGLER` environment variable is set to `'on'`.
 
 TestWrangler exposes a number of configuration options, which should be set in an initializer.
 
@@ -35,8 +37,19 @@ TestWrangler.config do |config|
   config.exclude_paths []
   config.redis Redis.new
   config.root_key :test_wrangler
+  config.logger Rails.logger
+  config.username ENV["TEST_WRANGLER_USER"]
+  config.password ENV["TEST_WRANGLER_PASSWORD"]
 end
 ```
+
+To use the TestWrangler CMS, you will have to mount its engine in your `routes.rb` file. TestWrangler currently only supports being mounted at `/test_wrangler`:
+
+```ruby
+mount TestWrangler::Engine, at: '/test_wrangler'
+```  
+
+You will also have to set a username and password for the basic HTTP auth system used by the CMS. These can be configured using `config` method as shown above, or by directly setting the `TEST_WRANGLER_USER` and `TEST_WRANGLER_PASSWORD` environment variables.
 
 ### Config Options
 
