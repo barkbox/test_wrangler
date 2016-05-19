@@ -25,5 +25,6 @@
 //= require ./apps/cohorts/collection.js
 //= require ./apps/cohorts/views/index.js
 //= require ./apps/cohorts/views/show.js
+//= require ./apps/cohorts/views/new.js
 //= require ./apps/cohorts/router.js
 //= require ./app.js

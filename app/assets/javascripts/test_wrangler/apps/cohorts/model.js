@@ -26,7 +26,7 @@ var Cohort = TestWranglerModel.extend({
     },
     toJSON: function(options){
         if(this.attributes.newRecord){
-            return {cohort: {name: this.id, priority: this.attributes.priority, criteria: this.attributes.variants}};
+            return {cohort: {name: this.id, priority: this.attributes.priority, criteria: this.attributes.criteria}};
         } else {
             return {cohort: {experiments: this.attributes.experiments, state: this.attributes.state, priority: this.attributes.priority }};
         }

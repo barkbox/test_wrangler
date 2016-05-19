@@ -33,7 +33,7 @@
   <div class="field-group experiments">
     <span class="label">Current Experiments</span>
     {{~ it.experiments :value }}
-      <label data-experiment-name="{{= value}}">
+      <label data-experiment-name="{{= value}}" class="pill">
       {{= value}} <button class="btn toggle-experiment remove"></button>
       </label>
     {{~}}
@@ -41,7 +41,7 @@
   <div class="field-group other-experiments">
     <span class="label">Available Experiments</span>
     {{~ it.otherExperiments :value }}
-      <label data-experiment-name="{{= value}}">
+      <label data-experiment-name="{{= value}}" class="pill">
       {{= value}} <button class="btn toggle-experiment add"></button>
       </label>
     {{~}}

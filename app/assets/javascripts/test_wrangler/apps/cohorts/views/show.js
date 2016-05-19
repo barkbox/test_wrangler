@@ -50,6 +50,7 @@ var CohortView = TestWranglerView.extend({
     },
     destroyModel: function(){
         this.model.destroy({success: function(){
+            Backbone.history.trigger('beforePageChange');
             Backbone.history.navigate('cohorts', true);
         }});
     },

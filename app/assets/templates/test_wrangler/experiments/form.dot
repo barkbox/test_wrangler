@@ -4,7 +4,7 @@
 <section class="form experiment">
   <div class="field-group">
   <span class="label">Name</span>
-   <input class="experiment-name" value="{{= it.name ||""}}">
+   <input class="experiment-name" value="{{= it.name ||""}}"  tabindex="1">
   </div>
   <div class="field-group">
     <span class="label">Variants</span>
@@ -22,21 +22,30 @@
       {{~ it.variants :variant:index }}
         <tr>
         <td>
-          <input data-index="{{= index}}" class="variant-name" value="{{= Object.keys(variant)[0] }}" type="text">
+          <input data-index="{{= index}}" class="variant-name" value="{{= Object.keys(variant)[0] }}" type="text" tabindex="{{= 2 + (index * 3) }}">
         </td>
         <td>
-          <input data-index="{{= index}}" class="variant-weight" type="text" value="{{= (variant[Object.keys(variant)[0]] * 100) }}">%
+          <input data-index="{{= index}}" class="variant-weight" type="text" value="{{= (variant[Object.keys(variant)[0]] * 100) }}" tabindex="{{= 3 + (index * 3) }}">%
         </td>
         <td>
-          <button class="remove-variant btn remove" data-index="{{= index}}"></button>
+          <button class="remove-variant btn remove" data-index="{{= index}}" tabindex="{{= 4 + (index * 3) }}"></button>
         </td>
         </tr>
       {{~}}
+        <tr>
+        <td>
+          <input class="new-variant-name" placeholder="Name" tabindex="{{= (it.variants.length * 3) + 2 }}">
+        </td>
+        <td>
+          <input class="new-variant-weight" placeholder="Weight (%)" tabindex="{{= (it.variants.length * 3) + 3 }}">
+        </td>
+        <td>
+          <button class="btn green add-variant" tabindex="{{= (it.variants.length * 3) + 4 }}">Add Variant +</button>
+        </td>
       </tbody>
     </table>
-    <input class="new-variant-name" placeholder="Name"><input class="new-variant-weight" placeholder="Weight (%)"><button class="btn green add-variant">Add Variant +</button>
   </div>
   <div class="field-group">
-    <button class="save btn green">Save</button>
+    <button class="save btn green" tabindex="{{= (it.variants.length * 3) + 5 }}">Save</button>
   </div>
 </section>

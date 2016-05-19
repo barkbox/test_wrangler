@@ -28,15 +28,15 @@
   <div class="field-group cohorts">
     <span class="label">Current Cohorts</span>
     {{~ it.cohorts :value }}
-      <label data-cohort-name="{{= value}}">
+      <label data-cohort-name="{{= value}}" class="pill">
       {{= value}} <button class="btn toggle-cohort remove"></button>
       </label>
     {{~}}
   </div>
   <div class="field-group other-cohorts">
-    <span class="label">Available Cohorts</span>
+    <span class="label pill">Available Cohorts</span>
     {{~ it.otherCohorts :value }}
-      <label data-cohort-name="{{= value}}">
+      <label data-cohort-name="{{= value}}" class="pill">
       {{= value}} <button class="btn toggle-cohort add"></button>
       </label>
     {{~}}

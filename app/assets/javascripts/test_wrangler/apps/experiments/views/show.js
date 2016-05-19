@@ -49,6 +49,7 @@ var ExperimentView = TestWranglerView.extend({
     },
     destroyModel: function(){
         this.model.destroy({success: function(){
+            Backbone.history.trigger('beforePageChange');
             Backbone.history.navigate('experiments', true);
         }});
     }
