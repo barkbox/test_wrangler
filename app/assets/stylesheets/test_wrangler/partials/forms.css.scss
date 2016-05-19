@@ -35,3 +35,11 @@ div.field-group{
     border-bottom: 1px solid rgb(100,100,100);
   }
 }
+
+label.pill{
+  display: inline-block;
+  padding: 0.5em 0.75em;
+  margin: 0 0.5em 0.5em 0;
+  border: 1px solid rgb(100,100,100);
+  height: auto;
+}
