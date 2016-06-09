@@ -40,14 +40,14 @@ var NewCohortView = TestWranglerView.extend({
     removeCriterion: function(e){
         var index = $(e.target).data('index');
         var criteria = _.clone(this.model.get('criteria'));
-        critera.splice(index, 1);
+        criteria.splice(index, 1);
         this.model.set({criteria: criteria});
     },
     updateCohortName: function(e){
         this.model.set('name', $(e.target).val());
     },
     updateCohortPriority: function(e){
-        this.model.set('priority', +$(e.target).val());
+        this.model.set('priority', +$(e.target).val(), {silent: true});
     },
     saveCohort: function(e){
         e.preventDefault();
