@@ -4,6 +4,7 @@ $(function(){
     Backbone.history.start({pushState: true, root: "/test_wrangler/dashboard/"});
     var bbRoot = Backbone.history.root.replace(/^\//, '').replace(/\/$/, '');
     var bbRootRegexp = new RegExp(bbRoot);
+    
     $(document.body).on('click', 'a', function(e) {
         window.addEventListener('popstate', function(e){
             Backbone.history.trigger('beforePageChange');

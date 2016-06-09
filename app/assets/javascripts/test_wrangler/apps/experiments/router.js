@@ -1,5 +1,6 @@
 var ExperimentsRouter = Backbone.Router.extend({
     routes: {
+        "": "index",
         "experiments/new": "new",
         "experiments": "index",
         "experiments/:name(/)": "show"
