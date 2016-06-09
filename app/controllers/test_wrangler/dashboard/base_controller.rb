@@ -3,7 +3,7 @@ class TestWrangler::Dashboard::BaseController < TestWrangler::ApplicationControl
   layout 'test_wrangler/dashboard'
 
   def bootstrap
-    render nothing: true, layout: true
+    render text: "", layout: true
   end
 
   def ensure_html_request  
