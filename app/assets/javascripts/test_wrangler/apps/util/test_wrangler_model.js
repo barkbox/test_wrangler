@@ -47,8 +47,8 @@ var TestWranglerModel = Backbone.Model.extend({
 
     // Set temporary attributes if `{wait: true}` to properly find new ids.
     if (attrs && wait) this.attributes = _.extend({}, attributes, attrs);
-
-    var method = options.method ? options.method : this.isNew() ? 'create' : (options.patch ? 'patch' : 'update');
+    var method = options.method ? options.method : (this.isNew() ? 'create' : (options.patch ? 'patch' : 'update'));
+    delete options.method;
     if (method === 'patch' && !options.attrs) options.attrs = attrs;
     var xhr = this.sync(method, this, options);
 
