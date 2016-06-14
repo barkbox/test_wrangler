@@ -160,7 +160,7 @@ describe TestWrangler::Middleware do
       end
 
       it 'logs the error' do
-        expect(@logger).to receive(:error).with(Redis::BaseError)
+        expect(@logger).to receive(:error).with("[TestWrangler] #{Redis::BaseError}")
         middleware.call(env)
       end
     end
