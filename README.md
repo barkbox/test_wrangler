@@ -40,6 +40,7 @@ TestWrangler.config do |config|
   config.logger Rails.logger
   config.username ENV["TEST_WRANGLER_USER"]
   config.password ENV["TEST_WRANGLER_PASSWORD"]
+  config.verbose false
 end
 ```
 
@@ -59,6 +60,21 @@ You will also have to set a username and password for the basic HTTP auth system
   A redis instance to use as the base connection for TestWrangler. Defaults to whatever the result of calling `Redis.new` returns
 - `root_key(key)`
   The root key to use to namespace TestWrangler data. Defaults to `:test_wrangler`. May be a string or a symbol
+- `logger(logger_instance)`
+  An object that implements the ruby logger interface, to which all logging calls will be sent. Passing nil or false will disable all logging. Defaults to the Rails logger
+- `verbose(boolean)`
+  When the value of verbose is set to a truthy value, additional logging will be performed from the assignment middleware for debugging. Defaults to false
+
+### Forcing a Test Selection
+
+It can be useful to force a test selection during development. To do so, you can set the selection in the query parameters. If the selection is valid, it will be set in the cookies and used for future requests in the session
+
+Format:
+
+```
+https://my-site.com/?TW_SELECTION=cohort:experiment:variant
+```
+Some browsers will require that you URL encode the commas used to seperate the components of the selection
 
 ### Cohorts and Experiments
 
