@@ -16,7 +16,7 @@ module TestWrangler
       return app.call(env) unless TestWrangler.active? && TestWrangler.valid_request_path?(env['REQUEST_PATH'])
 
       req = ActionDispatch::Request.new(env)
-      selection_from_params = req.query_parameters['TW_SELECTION'].present? ? HashWithIndifferentAccess[COOKIE_KEYS.zip(req.query_parameters['TW_SELECTION'].split(':'))] : nil
+      selection_from_params = req.query_parameters['TW_SELECTION'].present? ? Hash[COOKIE_KEYS.zip(req.query_parameters['TW_SELECTION'].split(':'))].with_indifferent_access : nil
       log("QP Selection: #{selection_from_params}")
       tw_cookie = JSON.parse(Rack::Utils.unescape(req.cookies['test_wrangler'])).with_indifferent_access rescue nil
       log("QP Cookie: #{tw_cookie}")
