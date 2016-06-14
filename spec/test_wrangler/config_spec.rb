@@ -67,6 +67,21 @@ describe TestWrangler::Config do
     end  
   end
 
+  describe '#verbose(verbose=false)' do
+    context 'with an argument' do
+      it 'sets verbosity' do
+        config.verbose true
+        expect(config.verbose).to eq(true)
+      end
+    end
+    
+    context 'without an argument' do
+      it 'returns false' do
+        expect(config.verbose).to eq(false)
+      end
+    end
+  end
+
   describe '#username(username=nil)' do
     before do      
         ENV.delete('TEST_WRANGLER_USER')

@@ -13,6 +13,10 @@ module TestWrangler
       @logger ||= logger
     end
 
+    def verbose(verbose=false)
+      @verbose ||= verbose
+    end
+
     def exclude_paths(*paths)
       return @exclude_paths if defined? @exclude_paths
       paths = [paths].flatten
