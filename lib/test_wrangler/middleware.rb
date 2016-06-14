@@ -1,5 +1,6 @@
 module TestWrangler
   class Middleware
+    COOKIE_KEYS = [:cohort, :experiment, :variant]
     attr_reader :app
 
     def initialize(app)
@@ -10,9 +11,16 @@ module TestWrangler
       return app.call(env) unless TestWrangler.active? && TestWrangler.valid_request_path?(env['REQUEST_PATH'])
 
       req = ActionDispatch::Request.new(env)
+      selection_from_params = req.query_parameters['TW_SELECTION'].present? ? HashWithIndifferentAccess[COOKIE_KEYS.zip(req.query_parameters['TW_SELECTION'].split(':'))] : nil
       tw_cookie = JSON.parse(Rack::Utils.unescape(req.cookies['test_wrangler'])).with_indifferent_access rescue nil
-
-      if tw_cookie && TestWrangler.experiment_active?(tw_cookie['experiment'])
+      
+      if selection_from_params && selection_from_params != tw_cookie && TestWrangler.experiment_active?(selection_from_params['experiment'])
+        env['test_wrangler'] = selection_from_params
+        status, headers, body = app.call(env)
+        resp = ActionDispatch::Response.new(status, headers, body)
+        resp.set_cookie('test_wrangler', Rack::Utils.escape(selection_from_params.to_json))
+        resp.to_a
+      elsif tw_cookie && TestWrangler.experiment_active?(tw_cookie['experiment'])
         env['test_wrangler'] = tw_cookie
         app.call(env)
       elsif assignment = TestWrangler.assignment_for(env)
