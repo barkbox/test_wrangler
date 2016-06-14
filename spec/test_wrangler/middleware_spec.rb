@@ -37,7 +37,7 @@ describe TestWrangler::Middleware do
       let(:env){ Rack::MockRequest.env_for('https://barkbox.com', {'QUERY_STRING' => 'TW_SELECTION=base%3Atwitter_oauth%3Acontrol'}) }
 
       it_behaves_like "it sets the env"
-      it_behaves_like "it assigns the response cookie"
+      it_behaves_like "it assigns the response cookie", {cohort: 'base', experiment: 'twitter_oauth', variant: 'control'}
 
       context 'if a cookie selection is set that is different from the qp' do
         let(:env) do
@@ -47,7 +47,7 @@ describe TestWrangler::Middleware do
         end
         
         it_behaves_like "it sets the env"
-        it_behaves_like "it assigns the response cookie"
+        it_behaves_like "it assigns the response cookie", {cohort: 'base', experiment: 'twitter_oauth', variant: 'control'}
       end
     end
 
@@ -64,7 +64,7 @@ describe TestWrangler::Middleware do
         end
 
         it_behaves_like "it sets the env"
-        it_behaves_like "it assigns the response cookie"
+        it_behaves_like "it assigns the response cookie", {"cohort"=>"base", "experiment"=>"new_copy", "variant"=>"delightful"}
       end
       
       context 'if no experiments are running for the request cohort' do

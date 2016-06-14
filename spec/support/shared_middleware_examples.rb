@@ -25,7 +25,7 @@ shared_examples "it unsets the response cookie" do
   end
 end
 
-shared_examples "it assigns the response cookie" do
+shared_examples "it assigns the response cookie" do |expected|
   it "should add an assignment to SET_COOKIE" do
     cookies = process_cookies(env['HTTP_COOKIE'])
     tw_cookie = cookies['test_wrangler']
@@ -33,5 +33,8 @@ shared_examples "it assigns the response cookie" do
     set_cookie = process_cookies(headers['Set-Cookie'])
     expect(set_cookie['test_wrangler']).to_not be_blank
     expect(set_cookie['test_wrangler']).to_not eq(tw_cookie)
+    if expected
+      expect(HashWithIndifferentAccess.new(JSON.parse(Rack::Utils.unescape(set_cookie['test_wrangler'])))).to eq(expected.with_indifferent_access)
+    end
   end
 end
