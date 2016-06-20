@@ -10,7 +10,7 @@ module TestWrangler
     end
 
     def cookie_domain(domain=nil)
-      @cookie_domain ||= domain ? domain : Rails.application.routes.default_url_options[:host]
+      @cookie_domain ||= domain
     end
 
     def logger(logger=nil)

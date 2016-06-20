@@ -44,12 +44,8 @@ describe TestWrangler::Config do
     end
 
     context 'without an argument' do
-      before do
-        allow(Rails.application.routes.default_url_options).to receive(:[]).with(:host){ 'www.barkbox.com' }
-      end
-
       it 'returns the default cookie domain' do
-        expect(config.cookie_domain).to eq('www.barkbox.com')
+        expect(config.cookie_domain).to eq(nil)
       end
     end
   end
