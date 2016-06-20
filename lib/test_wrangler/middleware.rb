@@ -26,7 +26,7 @@ module TestWrangler
         env['test_wrangler'] = selection_from_params
         status, headers, body = app.call(env)
         resp = ActionDispatch::Response.new(status, headers, body)
-        resp.set_cookie('test_wrangler', Rack::Utils.escape(selection_from_params.to_json))
+        resp.set_cookie('test_wrangler', {value: Rack::Utils.escape(selection_from_params.to_json), domain: TestWrangler.config.cookie_domain})
         resp.to_a
       elsif tw_cookie && TestWrangler.experiment_active?(tw_cookie['experiment'])
         log("Selecting from cookie")
@@ -37,7 +37,7 @@ module TestWrangler
         env['test_wrangler'] = assignment
         status, headers, body = app.call(env)
         resp = ActionDispatch::Response.new(status, headers, body)
-        resp.set_cookie('test_wrangler', Rack::Utils.escape(assignment.to_json))
+        resp.set_cookie('test_wrangler', {value: Rack::Utils.escape(assignment.to_json), domain: TestWrangler.config.cookie_domain})
         resp.to_a
       else
         if tw_cookie

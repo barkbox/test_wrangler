@@ -9,6 +9,10 @@ module TestWrangler
       @root_key ||= key_name ? key_name : :test_wrangler
     end
 
+    def cookie_domain(domain=nil)
+      @cookie_domain ||= domain ? domain : Rails.application.routes.default_url_options[:host]
+    end
+
     def logger(logger=nil)
       @logger ||= logger
     end

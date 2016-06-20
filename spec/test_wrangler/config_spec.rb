@@ -35,6 +35,25 @@ describe TestWrangler::Config do
     end
   end
 
+  describe '#cookie_domain(domain=nil)' do
+    context 'with an argument' do
+      it 'sets the cookie domain' do
+        config.cookie_domain(".barkbox.com")
+        expect(config.cookie_domain).to eq(".barkbox.com")
+      end
+    end
+
+    context 'without an argument' do
+      before do
+        allow(Rails.application.routes.default_url_options).to receive(:[]).with(:host){ 'www.barkbox.com' }
+      end
+
+      it 'returns the default cookie domain' do
+        expect(config.cookie_domain).to eq('www.barkbox.com')
+      end
+    end
+  end
+
   describe '#exclude_paths(*paths)' do
     context 'with a list of strings and/or regexps' do
       it 'sets the exclusion paths to an array of regexps' do
