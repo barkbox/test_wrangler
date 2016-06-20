@@ -9,6 +9,10 @@ module TestWrangler
       @root_key ||= key_name ? key_name : :test_wrangler
     end
 
+    def cookie_domain(domain=nil)
+      @cookie_domain ||= domain
+    end
+
     def logger(logger=nil)
       @logger ||= logger
     end

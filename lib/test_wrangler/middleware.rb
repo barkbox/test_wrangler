@@ -12,6 +12,14 @@ module TestWrangler
       TestWrangler.logger.send(level, "[TestWrangler] #{message}")
     end
 
+    def set_cookie(resp, selection)
+      value = {value: Rack::Utils.escape(selection.to_json)}
+      if TestWrangler.config.cookie_domain.present?
+        value[:domain] = TestWrangler.config.cookie_domain
+      end
+      resp.set_cookie('test_wrangler', value)
+    end
+
     def call(env)
       return app.call(env) unless TestWrangler.active? && TestWrangler.valid_request_path?(env['REQUEST_PATH'])
 
@@ -26,7 +34,7 @@ module TestWrangler
         env['test_wrangler'] = selection_from_params
         status, headers, body = app.call(env)
         resp = ActionDispatch::Response.new(status, headers, body)
-        resp.set_cookie('test_wrangler', Rack::Utils.escape(selection_from_params.to_json))
+        set_cookie(resp, selection_from_params)
         resp.to_a
       elsif tw_cookie && TestWrangler.experiment_active?(tw_cookie['experiment'])
         log("Selecting from cookie")
@@ -37,7 +45,7 @@ module TestWrangler
         env['test_wrangler'] = assignment
         status, headers, body = app.call(env)
         resp = ActionDispatch::Response.new(status, headers, body)
-        resp.set_cookie('test_wrangler', Rack::Utils.escape(assignment.to_json))
+        set_cookie(resp, assignment)
         resp.to_a
       else
         if tw_cookie
